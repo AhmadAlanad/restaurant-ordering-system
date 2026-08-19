@@ -30,83 +30,86 @@ function Register() {
 
     };
 
-    const validate = () => {
+	const validate = () => {
 
-        const newErrors = {};
+	    const newErrors = {};
 
-        // FULL NAME
-        if (!formData.fullName.trim()) {
+	    // FULL NAME
+	    if (!formData.fullName.trim()) {
 
-            newErrors.fullName =
-                "Full name is required.";
+	        newErrors.fullName =
+	            "Full name is required.";
 
-        } else if (formData.fullName.trim().length < 2) {
+	    } else if (formData.fullName.trim().length < 2) {
 
-            newErrors.fullName =
-                "Full name must be at least 2 characters.";
+	        newErrors.fullName =
+	            "Full name must be at least 2 characters.";
 
-        }
+	    }
 
-        // EMAIL
-        if (!formData.email.trim()) {
+	    // EMAIL
+	    if (!formData.email.trim()) {
 
-            newErrors.email =
-                "Email is required.";
+	        newErrors.email =
+	            "Email is required.";
 
-        } else if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-        ) {
+	    } else if (
+	        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+	    ) {
 
-            newErrors.email =
-                "Please enter a valid email.";
+	        newErrors.email =
+	            "Please enter a valid email.";
 
-        }
+	    }
 
-        // PASSWORD
-        if (!formData.password) {
+	    // PASSWORD
+	    if (!formData.password) {
 
-            newErrors.password =
-                "Password is required.";
+	        newErrors.password =
+	            "Password is required.";
 
-        } else if (formData.password.length < 6) {
+	    } else if (formData.password.length < 6) {
 
-            newErrors.password =
-                "Password must be at least 6 characters.";
+	        newErrors.password =
+	            "Password must be at least 6 characters.";
 
-        }
+	    }
 
+	    // CONFIRM PASSWORD
+	    if (!formData.confirmPassword) {
 
-// CONFIRM PASSWORD
-if (!formData.confirmPassword) {
+	        newErrors.confirmPassword =
+	            "Please confirm your password.";
 
-    newErrors.confirmPassword =
-        "Please confirm your password.";
+	    } else if (
+	        formData.password !== formData.confirmPassword
+	    ) {
 
-} else if (
-    formData.password !== formData.confirmPassword
-) {
+	        newErrors.confirmPassword =
+	            "Passwords do not match.";
 
-    newErrors.confirmPassword =
-        "Passwords do not match.";
+	    }
 
-}
+	    // PHONE
+	    if (!formData.phone.trim()) {
 
-        // PHONE
-        if (!formData.phone.trim()) {
+	        newErrors.phone =
+	            "Phone number is required.";
 
-            newErrors.phone =
-                "Phone number is required.";
+	    } else if (
+	        !/^[0-9+\-\s()]{7,20}$/.test(formData.phone)
+	    ) {
 
-        } else if (
-            !/^[0-9+\-\s()]{7,20}$/.test(formData.phone)
-        ) {
+	        newErrors.phone =
+	            "Please enter a valid phone number.";
 
-            newErrors.phone =
-                "Please enter a valid phone number.";
+	    }
 
-        }
+	    // IMPORTANT
+	    setErrors(newErrors);
 
-    };
+	    return Object.keys(newErrors).length === 0;
+	};
 
     const handleSubmit = async (e) => {
 
