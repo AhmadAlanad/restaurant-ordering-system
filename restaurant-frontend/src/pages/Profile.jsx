@@ -1,16 +1,18 @@
 import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "../context/AuthContext";
+
 import api from "../services/api";
 
 function Profile() {
 
     const { user } = useContext(AuthContext);
 
-    	const [fullName, setFullName] = useState("");
-    	const [phone, setPhone] = useState("");
-    	const [address, setAddress] = useState("");
-	const [currentPassword, setCurrentPassword] = useState("");
-	const [newPassword, setNewPassword] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [phone, setPhone] = useState("");
+
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
 
     useEffect(() => {
 
@@ -18,23 +20,23 @@ function Profile() {
 
             setFullName(user.fullName);
             setPhone(user.phone);
-            setAddress(user.address);
 
         }
 
     }, [user]);
 
+
     const saveProfile = async () => {
 
         try {
 
-            const response = await api.put(`/users/${user.id}`, {
-
-                fullName,
-                phone,
-                address
-
-            });
+            const response = await api.put(
+                `/users/${user.id}`,
+                {
+                    fullName,
+                    phone
+                }
+            );
 
             alert("Profile updated successfully!");
 
@@ -55,29 +57,34 @@ function Profile() {
 
     };
 
-	const changePassword = async () => {
 
-    try {
+    const changePassword = async () => {
 
-        await api.put(`/users/${user.id}/change-password`, {
+        try {
 
-            currentPassword,
-            newPassword
+            await api.put(
+                `/users/${user.id}/change-password`,
+                {
+                    currentPassword,
+                    newPassword
+                }
+            );
 
-        });
+            alert("Password changed successfully!");
 
-        alert("Password changed successfully!");
+            setCurrentPassword("");
+            setNewPassword("");
 
-        setCurrentPassword("");
-        setNewPassword("");
+        } catch (error) {
 
-    } catch (error) {
+            console.error(error);
 
-        alert("Current password is incorrect.");
+            alert("Current password is incorrect.");
 
-    }
+        }
 
-};
+    };
+
 
     return (
 
@@ -89,21 +96,32 @@ function Profile() {
 
                 <div className="card-body">
 
+                    {/* FULL NAME */}
+
                     <div className="mb-3">
 
-                        <label className="form-label">Full Name</label>
+                        <label className="form-label">
+                            Full Name
+                        </label>
 
                         <input
                             className="form-control"
                             value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
+                            onChange={(e) =>
+                                setFullName(e.target.value)
+                            }
                         />
 
                     </div>
 
+
+                    {/* EMAIL */}
+
                     <div className="mb-3">
 
-                        <label className="form-label">Email</label>
+                        <label className="form-label">
+                            Email
+                        </label>
 
                         <input
                             className="form-control"
@@ -113,30 +131,25 @@ function Profile() {
 
                     </div>
 
+
+                    {/* PHONE */}
+
                     <div className="mb-3">
 
-                        <label className="form-label">Phone</label>
+                        <label className="form-label">
+                            Phone
+                        </label>
 
                         <input
                             className="form-control"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) =>
+                                setPhone(e.target.value)
+                            }
                         />
 
                     </div>
 
-                    <div className="mb-3">
-
-                        <label className="form-label">Address</label>
-
-                        <textarea
-                            className="form-control"
-                            rows="3"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                        />
-
-                    </div>
 
                     <button
                         className="btn btn-primary"
@@ -145,42 +158,60 @@ function Profile() {
                         Save Changes
                     </button>
 
-		<hr />
 
-<h4>Change Password</h4>
+                    <hr />
 
-<div className="mb-3">
 
-    <label>Current Password</label>
+                    {/* CHANGE PASSWORD */}
 
-    <input
-        type="password"
-        className="form-control"
-        value={currentPassword}
-        onChange={(e) => setCurrentPassword(e.target.value)}
-    />
+                    <h4>Change Password</h4>
 
-</div>
+                    <div className="mb-3">
 
-<div className="mb-3">
+                        <label>
+                            Current Password
+                        </label>
 
-    <label>New Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            value={currentPassword}
+                            onChange={(e) =>
+                                setCurrentPassword(
+                                    e.target.value
+                                )
+                            }
+                        />
 
-    <input
-        type="password"
-        className="form-control"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-    />
+                    </div>
 
-</div>
 
-<button
-    className="btn btn-warning"
-    onClick={changePassword}
->
-    Change Password
-</button>
+                    <div className="mb-3">
+
+                        <label>
+                            New Password
+                        </label>
+
+                        <input
+                            type="password"
+                            className="form-control"
+                            value={newPassword}
+                            onChange={(e) =>
+                                setNewPassword(
+                                    e.target.value
+                                )
+                            }
+                        />
+
+                    </div>
+
+
+                    <button
+                        className="btn btn-warning"
+                        onClick={changePassword}
+                    >
+                        Change Password
+                    </button>
 
                 </div>
 

@@ -199,41 +199,39 @@ function Home() {
 
 
     // Delete customer address
-    const deleteAddress = async (addressId) => {
+	const deleteAddress = async (addressId) => {
 
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this address?"
-        );
+	    const confirmDelete = window.confirm(
+	        "Are you sure you want to delete this address?"
+	    );
 
+	    if (!confirmDelete) {
+	        return;
+	    }
 
-        if (!confirmDelete) {
+	    try {
 
-            return;
+	        await api.delete(
+	            `/addresses/${user.id}/${addressId}`
+	        );
 
-        }
+	        // Clear the selected address if it was deleted
+	        if (selectedAddress?.id === addressId) {
+	            setSelectedAddress(null);
+	        }
 
+	        await loadAddresses();
 
-        try {
+	    } catch (error) {
 
-            await api.delete(
-                `/addresses/${user.id}/${addressId}`
-            );
+	        console.error(error);
 
+	        alert(
+	            "Failed to delete address."
+	        );
 
-            await loadAddresses();
-
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Failed to delete address."
-            );
-
-        }
-
-    };
+	    }
+	};
 
 
     return (
