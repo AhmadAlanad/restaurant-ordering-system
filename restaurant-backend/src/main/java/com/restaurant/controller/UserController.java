@@ -10,7 +10,7 @@ import com.restaurant.service.UserService;
 import com.restaurant.mapper.UserMapper;
 import com.restaurant.dto.ChangePasswordDTO;
 import jakarta.validation.Valid;
-import com.restaurant.dto.LocationRequestDTO;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -60,13 +60,6 @@ public class UserController {
 
     }
     
-    @PutMapping("/{id}/location")
-    public UserResponseDTO updateLocation(
-            @PathVariable Long id,
-            @RequestBody LocationRequestDTO request) {
-
-        return userService.updateLocation(id, request);
-
-    }
+    
 
 }

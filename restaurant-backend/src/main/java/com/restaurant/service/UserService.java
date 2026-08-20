@@ -10,7 +10,7 @@ import com.restaurant.entity.User;
 import com.restaurant.enums.Role;
 import com.restaurant.repository.UserRepository;
 import com.restaurant.dto.ChangePasswordDTO;
-import com.restaurant.dto.LocationRequestDTO;
+
 
 @Service
 public class UserService {
@@ -95,29 +95,7 @@ public class UserService {
 
     }
     
-    public UserResponseDTO updateLocation(
-            Long userId,
-            LocationRequestDTO request) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
-
-        
-
-        userRepository.save(user);
-
-        UserResponseDTO response = new UserResponseDTO();
-
-        response.setId(user.getId());
-        response.setFullName(user.getFullName());
-        response.setEmail(user.getEmail());
-        response.setPhone(user.getPhone());
-        response.setRole(user.getRole());
-
-
-        return response;
-    }
+    
     
     public User getUserById(Long id) {
 
