@@ -19,6 +19,8 @@ public class OrderResponseDTO {
     private Double longitude;
     
     private String addressDescription;
+    
+    private String addressLabel;
 
     private double totalPrice;
     
@@ -83,6 +85,14 @@ public class OrderResponseDTO {
     
     public void setAddressDescription(String addressDescription) {
         this.addressDescription = addressDescription;
+    }
+    
+    public String getAddressLabel() {
+        return addressLabel;
+    }
+
+    public void setAddressLabel(String addressLabel) {
+        this.addressLabel = addressLabel;
     }
 
     public double getTotalPrice() {

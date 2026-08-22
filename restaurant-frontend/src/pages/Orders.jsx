@@ -7,21 +7,37 @@ function Orders() {
     const { user } = useContext(AuthContext);
 
     const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
-        loadOrders();
+        if (user) {
+            loadOrders();
+        }
 
-    }, []);
+    }, [user]);
 
     const loadOrders = async () => {
-    try {
-        const response = await api.get("/orders");
-        setOrders(response.data);
-    } catch (error) {
-        console.error(error);
-    }
-};
+
+        try {
+
+            const response = await api.get(
+                `/orders/user/${user.id}`
+            );
+
+            setOrders(response.data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
 
     const getStatusColor = (status) => {
 
@@ -33,15 +49,39 @@ function Orders() {
             case "ACCEPTED":
                 return "success";
 
+            case "PREPARING":
+                return "info";
+
+            case "READY":
+                return "primary";
+
+            case "DELIVERED":
+                return "dark";
+
             case "REJECTED":
                 return "danger";
 
             default:
                 return "secondary";
-
         }
 
     };
+
+    if (loading) {
+
+        return (
+
+            <div className="container mt-4">
+
+                <h2>My Orders</h2>
+
+                <p>Loading...</p>
+
+            </div>
+
+        );
+
+    }
 
     return (
 
@@ -51,7 +91,11 @@ function Orders() {
 
             {orders.length === 0 ? (
 
-                <p>You haven't placed any orders yet.</p>
+                <div className="alert alert-info">
+
+                    You haven't placed any orders yet.
+
+                </div>
 
             ) : (
 
@@ -64,25 +108,95 @@ function Orders() {
 
                         <div className="card-body">
 
-                            <div className="d-flex justify-content-between">
+                            {/* HEADER */}
 
-                                <h4>
-                                    Order #{order.id}
-                                </h4>
+                            <div className="d-flex justify-content-between align-items-center">
 
-				<p className="text-muted mb-2">
-    				{new Date(order.orderDate).toLocaleString()}
-				</p>
+                                <div>
+
+                                    <h4>
+
+                                        Order #{order.id}
+
+                                    </h4>
+
+                                    <p className="text-muted mb-0">
+
+                                        {new Date(
+                                            order.orderDate
+                                        ).toLocaleString()}
+
+                                    </p>
+
+                                </div>
 
                                 <span
                                     className={`badge bg-${getStatusColor(order.status)}`}
                                 >
+
                                     {order.status}
+
                                 </span>
 
                             </div>
 
                             <hr />
+
+
+							{/* DELIVERY ADDRESS */}
+
+							<h5>
+							    📍 Delivery Address
+							</h5>
+
+							<p className="mb-1">
+							    <strong>Name:</strong>{" "}
+							    {order.addressLabel}
+							</p>
+
+							<p className="mb-1">
+							    <strong>Description:</strong>{" "}
+							    {order.addressDescription}
+							</p>
+
+							<hr />
+
+							{/* PAYMENT */}
+
+							<h5>
+							    💳 Payment Method
+							</h5>
+
+							<p>
+							    {order.paymentMethod === "CASH"
+							        ? "Cash"
+							        : "Credit Card"}
+							</p>
+
+							{/* NOTE */}
+
+							{order.customerNote && (
+							    <>
+							        <h5>
+							            📝 Note
+							        </h5>
+
+							        <p>
+							            {order.customerNote}
+							        </p>
+							    </>
+							)}
+
+							<hr />
+
+
+                            {/* ITEMS */}
+
+                            <h5>
+
+                                🍽 Ordered Items
+
+                            </h5>
 
                             <ul className="list-group mb-3">
 
@@ -95,15 +209,19 @@ function Orders() {
 
                                         <span>
 
-                                            {item.itemName} × {item.quantity}
+                                            {item.itemName}
+
+                                            {" × "}
+
+                                            {item.quantity}
 
                                         </span>
 
-                                        <span>
+                                        <strong>
 
-                                            {item.price * item.quantity} SR
+                                            {item.price * item.quantity} TL
 
-                                        </span>
+                                        </strong>
 
                                     </li>
 
@@ -111,17 +229,25 @@ function Orders() {
 
                             </ul>
 
-                            <h5>
 
-                                Total: {order.totalPrice} SR
+                            <h4 className="text-end">
 
-                            </h5>
+                                Total: {order.totalPrice} TL
+
+                            </h4>
+
+
+                            {/* REJECTION REASON */}
 
                             {order.rejectionReason && (
 
                                 <div className="alert alert-danger mt-3">
 
-                                    <strong>Reason:</strong>
+                                    <strong>
+
+                                        Rejection Reason:
+
+                                    </strong>
 
                                     {" "}
 

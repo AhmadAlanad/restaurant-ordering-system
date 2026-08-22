@@ -20,6 +20,8 @@ public class Order {
 
     private String customerPhone;
     
+    private String addressLabel;
+    
     private String addressDescription;
     
     private Double latitude;
@@ -75,6 +77,14 @@ public class Order {
 
 	public void setCustomerPhone(String customerPhone) {
 		this.customerPhone = customerPhone;
+	}
+	
+	public String getAddressLabel() {
+	    return addressLabel;
+	}
+
+	public void setAddressLabel(String addressLabel) {
+	    this.addressLabel = addressLabel;
 	}
 	
 	public String getAddressDescription() {

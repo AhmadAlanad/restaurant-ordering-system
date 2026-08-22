@@ -23,6 +23,8 @@ public class OrderRequestDTO {
 	private Double longitude;
 	
 	private String addressDescription;
+	
+	private String addressLabel;
 
     public OrderRequestDTO() {
     }
@@ -82,6 +84,14 @@ public class OrderRequestDTO {
 
     public void setAddressDescription(String addressDescription) {
         this.addressDescription = addressDescription;
+    }
+    
+    public String getAddressLabel() {
+        return addressLabel;
+    }
+
+    public void setAddressLabel(String addressLabel) {
+        this.addressLabel = addressLabel;
     }
     
 }

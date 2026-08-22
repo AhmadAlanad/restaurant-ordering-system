@@ -1,18 +1,18 @@
 package com.restaurant.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import com.restaurant.dto.OrderResponseDTO;
-import com.restaurant.mapper.OrderMapper;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import com.restaurant.dto.OrderRequestDTO;
-import com.restaurant.entity.Order;
-import com.restaurant.service.OrderService;
+import com.restaurant.dto.OrderResponseDTO;
 import com.restaurant.dto.RejectOrderDTO;
-import jakarta.validation.Valid;
-import java.util.ArrayList;
 
+import com.restaurant.mapper.OrderMapper;
+import com.restaurant.service.OrderService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -22,51 +22,32 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public OrderResponseDTO placeOrder(@Valid @RequestBody OrderRequestDTO request) {
+    public OrderResponseDTO placeOrder(
+            @Valid @RequestBody OrderRequestDTO request) {
 
-        return OrderMapper.toDTO(orderService.placeOrder(request));
-
+        return OrderMapper.toDTO(
+                orderService.placeOrder(request)
+        );
     }
-    
+
     @GetMapping
     public List<OrderResponseDTO> getAllOrders() {
 
-        List<OrderResponseDTO> response = new ArrayList<>();
+        return orderService.getAllOrders()
+                .stream()
+                .map(OrderMapper::toDTO)
+                .toList();
+    }
 
-        for (Order order : orderService.getAllOrders()) {
-            response.add(OrderMapper.toDTO(order));
-        }
+    @GetMapping("/{id}")
+    public OrderResponseDTO getOrderById(
+            @PathVariable Long id) {
 
-        return response;
+        return OrderMapper.toDTO(
+                orderService.getOrderById(id)
+        );
     }
-    
-    @PutMapping("/{id}/accept")
-    public Order acceptOrder(@PathVariable Long id) {
-        return orderService.acceptOrder(id);
-    }
-    
-    @PutMapping("/{id}/reject")
-    public Order rejectOrder(@PathVariable Long id,
-                             @RequestBody RejectOrderDTO rejectRequest) {
 
-        return orderService.rejectOrder(id, rejectRequest);
-    }
-    
-    @PutMapping("/{id}/preparing")
-    public Order preparingOrder(@PathVariable Long id) {
-        return orderService.preparingOrder(id);
-    }
-    
-    @PutMapping("/{id}/ready")
-    public Order readyOrder(@PathVariable Long id) {
-        return orderService.readyOrder(id);
-    }
-    
-    @PutMapping("/{id}/delivered")
-    public Order deliveredOrder(@PathVariable Long id) {
-        return orderService.deliveredOrder(id);
-    }
-    
     @GetMapping("/user/{userId}")
     public List<OrderResponseDTO> getOrdersByUser(
             @PathVariable Long userId) {
@@ -75,13 +56,51 @@ public class OrderController {
                 .stream()
                 .map(OrderMapper::toDTO)
                 .toList();
-
-    }
-    
-    @GetMapping("/{id}")
-    public OrderResponseDTO getOrderById(@PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
-        return OrderMapper.toDTO(order);
     }
 
+    @PutMapping("/{id}/accept")
+    public OrderResponseDTO acceptOrder(
+            @PathVariable Long id) {
+
+        return OrderMapper.toDTO(
+                orderService.acceptOrder(id)
+        );
+    }
+
+    @PutMapping("/{id}/reject")
+    public OrderResponseDTO rejectOrder(
+            @PathVariable Long id,
+            @RequestBody RejectOrderDTO rejectRequest) {
+
+        return OrderMapper.toDTO(
+                orderService.rejectOrder(id, rejectRequest)
+        );
+    }
+
+    @PutMapping("/{id}/preparing")
+    public OrderResponseDTO preparingOrder(
+            @PathVariable Long id) {
+
+        return OrderMapper.toDTO(
+                orderService.preparingOrder(id)
+        );
+    }
+
+    @PutMapping("/{id}/ready")
+    public OrderResponseDTO readyOrder(
+            @PathVariable Long id) {
+
+        return OrderMapper.toDTO(
+                orderService.readyOrder(id)
+        );
+    }
+
+    @PutMapping("/{id}/delivered")
+    public OrderResponseDTO deliveredOrder(
+            @PathVariable Long id) {
+
+        return OrderMapper.toDTO(
+                orderService.deliveredOrder(id)
+        );
+    }
 }

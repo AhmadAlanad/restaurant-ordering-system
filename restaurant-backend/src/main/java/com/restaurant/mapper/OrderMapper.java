@@ -17,6 +17,7 @@ public class OrderMapper {
         dto.setId(order.getId());
         dto.setCustomerName(order.getCustomerName());
         dto.setCustomerPhone(order.getCustomerPhone());
+        dto.setAddressLabel(order.getAddressLabel());
         dto.setAddressDescription(order.getAddressDescription());
         dto.setLatitude(order.getLatitude());
         dto.setLongitude(order.getLongitude());

@@ -70,6 +70,8 @@ if (!selectedAddress) {
     latitude: selectedAddress.latitude,
 
     longitude: selectedAddress.longitude,
+	
+	addressLabel: selectedAddress.label,
 
     addressDescription: selectedAddress.description,
 

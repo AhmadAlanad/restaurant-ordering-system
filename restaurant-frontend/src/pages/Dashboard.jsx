@@ -329,10 +329,21 @@ const deliveredOrder = async (id) => {
                 <p>
                     <strong>Phone:</strong> {selectedOrder.customerPhone}
                 </p>
+				
+				<p>
+				    <strong>Order Date:</strong>{" "}
+				    {new Date(selectedOrder.orderDate).toLocaleString()}
+				</p>
 
-                <p>
-    		    <strong>📍 Address:</strong> {selectedOrder.addressDescription}
-		</p>
+				<p>
+				    <strong>📍 Address:</strong>{" "}
+				    {selectedOrder.addressLabel}
+				</p>
+
+				<p>
+				    <strong>Description:</strong>{" "}
+				    {selectedOrder.addressDescription}
+				</p>
 
 {selectedOrder.latitude !== null &&
  selectedOrder.longitude !== null && (
