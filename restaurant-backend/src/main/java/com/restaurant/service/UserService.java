@@ -10,6 +10,12 @@ import com.restaurant.entity.User;
 import com.restaurant.enums.Role;
 import com.restaurant.repository.UserRepository;
 import com.restaurant.dto.ChangePasswordDTO;
+import com.restaurant.dto.LoginResponseDTO;
+import com.restaurant.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 
 @Service
@@ -17,6 +23,25 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtService jwtService;
+    
+    private User getAuthenticatedUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Authenticated user not found"));
+    }
 
     public UserResponseDTO register(RegisterRequestDTO request) {
 
@@ -34,7 +59,9 @@ public class UserService {
 
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
         user.setPhone(request.getPhone());
         
 
@@ -54,67 +81,110 @@ public class UserService {
         return response;
     }
 
-    public UserResponseDTO login(LoginRequestDTO request) {
+    public LoginResponseDTO login(LoginRequestDTO request) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new RuntimeException("Invalid email or password"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
 
-            throw new RuntimeException("Invalid email or password");
-
+            throw new RuntimeException(
+                    "Invalid email or password"
+            );
         }
 
-        UserResponseDTO response = new UserResponseDTO();
+        UserResponseDTO userResponse = new UserResponseDTO();
 
-        response.setId(user.getId());
-        response.setFullName(user.getFullName());
-        response.setEmail(user.getEmail());
-        response.setRole(user.getRole());
-        response.setPhone(user.getPhone());
-        
+        userResponse.setId(user.getId());
+        userResponse.setFullName(user.getFullName());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setRole(user.getRole());
+        userResponse.setPhone(user.getPhone());
 
-        return response;
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponseDTO(
+                token,
+                userResponse
+        );
     }
     
-    public void changePassword(Long id, ChangePasswordDTO request) {
+    public void changePassword(
+            Long id,
+            ChangePasswordDTO request) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User authenticatedUser = getAuthenticatedUser();
 
-        if (!user.getPassword().equals(request.getCurrentPassword())) {
+        if (!authenticatedUser.getId().equals(id)) {
 
-            throw new RuntimeException("Current password is incorrect.");
-
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You cannot change another user's password");
         }
 
-        user.setPassword(request.getNewPassword());
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                authenticatedUser.getPassword())) {
 
-        userRepository.save(user);
+            throw new RuntimeException(
+                    "Current password is incorrect.");
+        }
 
+        authenticatedUser.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(authenticatedUser);
     }
     
     
     
-    public User getUserById(Long id) {
-
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-    }
-    
-    public User updateUser(Long id, User updatedUser) {
+    public User getUserById(
+            Long id,
+            Authentication authentication) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (!user.getEmail().equals(authentication.getName())
+                && !authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+
+        	throw new org.springframework.security.access.AccessDeniedException(
+        	        "You are not allowed to access this user"
+        	);
+        }
+
+        return user;
+    }
+    
+    public User updateUser(
+            Long id,
+            User updatedUser,
+            Authentication authentication) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (!user.getEmail().equals(authentication.getName())
+                && !authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+
+        	throw new org.springframework.security.access.AccessDeniedException(
+        	        "You are not allowed to access this user"
+        	);
+        }
 
         user.setFullName(updatedUser.getFullName());
         user.setPhone(updatedUser.getPhone());
-        
 
         return userRepository.save(user);
-
     }
 
 }

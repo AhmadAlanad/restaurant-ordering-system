@@ -8,27 +8,30 @@ export function AuthProvider({ children }) {
         JSON.parse(localStorage.getItem("user"))
     );
 
-    const login = (userData) => {
+    const login = (loginData) => {
+
+        localStorage.setItem(
+            "token",
+            loginData.token
+        );
 
         localStorage.setItem(
             "user",
-            JSON.stringify(userData)
+            JSON.stringify(loginData.user)
         );
 
-        setUser(userData);
-
+        setUser(loginData.user);
     };
 
     const logout = () => {
 
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
 
         setUser(null);
-
     };
 
     return (
-
         <AuthContext.Provider
             value={{
                 user,
@@ -36,11 +39,7 @@ export function AuthProvider({ children }) {
                 logout
             }}
         >
-
             {children}
-
         </AuthContext.Provider>
-
     );
-
 }

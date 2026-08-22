@@ -10,6 +10,8 @@ import com.restaurant.service.UserService;
 import com.restaurant.mapper.UserMapper;
 import com.restaurant.dto.ChangePasswordDTO;
 import jakarta.validation.Valid;
+import com.restaurant.dto.LoginResponseDTO;
+import org.springframework.security.core.Authentication;
 
 
 @RestController
@@ -28,36 +30,43 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public UserResponseDTO login(
+    public LoginResponseDTO login(
             @Valid @RequestBody LoginRequestDTO request) {
 
         return userService.login(request);
     }
     
     @GetMapping("/{id}")
-    public UserResponseDTO getUserById(@PathVariable Long id) {
+    public UserResponseDTO getUserById(
+            @PathVariable Long id,
+            Authentication authentication) {
 
-        return UserMapper.toDTO(userService.getUserById(id));
-
+        return UserMapper.toDTO(
+                userService.getUserById(id, authentication)
+        );
     }
     
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(
             @PathVariable Long id,
-            @RequestBody User user) {
+            @RequestBody User user,
+            Authentication authentication) {
 
         return UserMapper.toDTO(
-                userService.updateUser(id, user));
-
+                userService.updateUser(
+                        id,
+                        user,
+                        authentication
+                )
+        );
     }
     
     @PutMapping("/{id}/change-password")
     public void changePassword(
             @PathVariable Long id,
-            @RequestBody ChangePasswordDTO request) {
+            @Valid @RequestBody ChangePasswordDTO request) {
 
         userService.changePassword(id, request);
-
     }
     
     

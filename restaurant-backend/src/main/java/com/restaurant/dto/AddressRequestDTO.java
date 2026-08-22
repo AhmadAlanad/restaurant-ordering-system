@@ -1,10 +1,20 @@
 package com.restaurant.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class AddressRequestDTO {
 
+    @NotBlank(message = "Address label is required")
     private String label;
+
+    @NotNull(message = "Latitude is required")
     private Double latitude;
+
+    @NotNull(message = "Longitude is required")
     private Double longitude;
+
+    @NotBlank(message = "Address description is required")
     private String description;
 
     public AddressRequestDTO() {
@@ -33,7 +43,7 @@ public class AddressRequestDTO {
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
-    
+
     public String getDescription() {
         return description;
     }
@@ -41,5 +51,4 @@ public class AddressRequestDTO {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }

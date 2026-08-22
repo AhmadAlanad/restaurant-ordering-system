@@ -70,7 +70,7 @@ public class OrderController {
     @PutMapping("/{id}/reject")
     public OrderResponseDTO rejectOrder(
             @PathVariable Long id,
-            @RequestBody RejectOrderDTO rejectRequest) {
+            @Valid @RequestBody RejectOrderDTO rejectRequest) {
 
         return OrderMapper.toDTO(
                 orderService.rejectOrder(id, rejectRequest)

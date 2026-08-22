@@ -5,6 +5,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.restaurant.dto.AddressRequestDTO;
 import com.restaurant.dto.AddressResponseDTO;
@@ -22,6 +25,19 @@ public class AddressService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    private User getAuthenticatedUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Authenticated user not found"));
+    }
 
 
     // Add a new address
@@ -29,9 +45,13 @@ public class AddressService {
             Long userId,
             AddressRequestDTO request) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+    	User user = getAuthenticatedUser();
+
+    	if (!user.getId().equals(userId)) {
+
+    	    throw new AccessDeniedException(
+    	            "You cannot add an address for another user");
+    	}
 
 
         Address address = new Address();
@@ -54,6 +74,14 @@ public class AddressService {
     // Get all addresses of a customer
     public List<AddressResponseDTO> getUserAddresses(
             Long userId) {
+    	User authenticatedUser = getAuthenticatedUser();
+
+    	if (!authenticatedUser.getId().equals(userId)
+    	        && authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN) {
+
+    	    throw new AccessDeniedException(
+    	            "You cannot access another user's addresses");
+    	}
 
         List<Address> addresses =
                 addressRepository.findByUserId(userId);
@@ -78,11 +106,18 @@ public class AddressService {
 
 
         // Make sure the address belongs to this user
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (!authenticatedUser.getId().equals(userId)) {
+
+            throw new AccessDeniedException(
+                    "You cannot delete another user's address");
+        }
+
         if (!address.getUser().getId().equals(userId)) {
 
-            throw new RuntimeException(
-                    "You cannot delete this address");
-
+            throw new AccessDeniedException(
+                    "This address does not belong to this user");
         }
 
 

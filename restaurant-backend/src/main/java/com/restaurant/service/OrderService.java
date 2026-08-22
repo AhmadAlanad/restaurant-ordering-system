@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.restaurant.dto.OrderRequestDTO;
 import com.restaurant.dto.RejectOrderDTO;
@@ -39,9 +42,7 @@ public class OrderService {
 
     public Order placeOrder(OrderRequestDTO request) {
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+    	User user = getAuthenticatedUser();
 
 
         Order order = new Order();
@@ -147,17 +148,45 @@ public class OrderService {
 
     public Order getOrderById(Long id) {
 
-        return findOrderById(id);
+        User authenticatedUser = getAuthenticatedUser();
+
+        Order order = findOrderById(id);
+
+        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
+                && !order.getUser().getId().equals(authenticatedUser.getId())) {
+
+            throw new AccessDeniedException(
+                    "You cannot access another user's order");
+        }
+
+        return order;
     }
 
 
     public List<Order> getAllOrders() {
+
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN) {
+
+            throw new AccessDeniedException(
+                    "Only administrators can view all orders");
+        }
 
         return orderRepository.findAllByOrderByIdDesc();
     }
 
 
     public List<Order> getOrdersByUser(Long userId) {
+
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
+                && !authenticatedUser.getId().equals(userId)) {
+
+            throw new AccessDeniedException(
+                    "You cannot access another user's orders");
+        }
 
         return orderRepository.findByUserId(userId);
     }
@@ -216,6 +245,19 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
 
         return orderRepository.save(order);
+    }
+    
+    private User getAuthenticatedUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Authenticated user not found"));
     }
 
 

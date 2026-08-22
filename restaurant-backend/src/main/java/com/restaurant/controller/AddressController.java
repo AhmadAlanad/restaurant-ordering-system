@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.restaurant.dto.AddressRequestDTO;
 import com.restaurant.dto.AddressResponseDTO;
 import com.restaurant.service.AddressService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -20,7 +21,7 @@ public class AddressController {
     @PostMapping("/{userId}")
     public AddressResponseDTO addAddress(
             @PathVariable Long userId,
-            @RequestBody AddressRequestDTO request) {
+            @Valid @RequestBody AddressRequestDTO request) {
 
         return addressService.addAddress(
                 userId,
