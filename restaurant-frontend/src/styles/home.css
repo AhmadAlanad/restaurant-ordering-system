@@ -1,0 +1,22 @@
+.home-page {
+    margin-top: 3rem;
+}
+
+.home-header {
+    text-align: center;
+}
+
+.address-card {
+    height: 100%;
+}
+
+.address-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.home-menu-card,
+.home-admin-card {
+    height: 100%;
+    text-align: center;
+}

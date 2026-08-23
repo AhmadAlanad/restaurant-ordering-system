@@ -4,34 +4,30 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { AddressContext } from "../context/AddressContext";
 
+import "../styles/home.css";
+
 function Home() {
 
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [addresses, setAddresses] = useState([]);
-
     const [showAddressForm, setShowAddressForm] = useState(false);
-
     const [addressLabel, setAddressLabel] = useState("");
-
     const [addressDescription, setAddressDescription] = useState("");
-
     const [locationLoading, setLocationLoading] = useState(false);
-
     const [locationError, setLocationError] = useState("");
 
     const { selectedAddress, setSelectedAddress } =
-    useContext(AddressContext);
+        useContext(AddressContext);
 
 
     // Load customer addresses
+
     useEffect(() => {
 
         if (user && user.role === "CUSTOMER") {
-
             loadAddresses();
-
         }
 
     }, [user]);
@@ -57,6 +53,7 @@ function Home() {
 
 
     // Add new customer address
+
     const addAddress = () => {
 
         if (!addressLabel.trim()) {
@@ -66,9 +63,7 @@ function Home() {
             );
 
             return;
-
         }
-
 
         if (!addressDescription.trim()) {
 
@@ -77,9 +72,7 @@ function Home() {
             );
 
             return;
-
         }
-
 
         if (!navigator.geolocation) {
 
@@ -88,14 +81,10 @@ function Home() {
             );
 
             return;
-
         }
 
-
         setLocationError("");
-
         setLocationLoading(true);
-
 
         navigator.geolocation.getCurrentPosition(
 
@@ -106,7 +95,6 @@ function Home() {
 
                 const longitude =
                     position.coords.longitude;
-
 
                 try {
 
@@ -120,20 +108,15 @@ function Home() {
                         }
                     );
 
-
                     alert(
                         "Address saved successfully!"
                     );
 
-
                     setAddressLabel("");
-
                     setAddressDescription("");
-
                     setShowAddressForm(false);
 
                     await loadAddresses();
-
 
                 } catch (error) {
 
@@ -154,7 +137,6 @@ function Home() {
             (error) => {
 
                 console.error(error);
-
 
                 if (error.code === 1) {
 
@@ -182,7 +164,6 @@ function Home() {
 
                 }
 
-
                 setLocationLoading(false);
 
             },
@@ -199,48 +180,49 @@ function Home() {
 
 
     // Delete customer address
-	const deleteAddress = async (addressId) => {
 
-	    const confirmDelete = window.confirm(
-	        "Are you sure you want to delete this address?"
-	    );
+    const deleteAddress = async (addressId) => {
 
-	    if (!confirmDelete) {
-	        return;
-	    }
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this address?"
+        );
 
-	    try {
+        if (!confirmDelete) {
+            return;
+        }
 
-	        await api.delete(
-	            `/addresses/${user.id}/${addressId}`
-	        );
+        try {
 
-	        // Clear the selected address if it was deleted
-	        if (selectedAddress?.id === addressId) {
-	            setSelectedAddress(null);
-	        }
+            await api.delete(
+                `/addresses/${user.id}/${addressId}`
+            );
 
-	        await loadAddresses();
+            if (selectedAddress?.id === addressId) {
+                setSelectedAddress(null);
+            }
 
-	    } catch (error) {
+            await loadAddresses();
 
-	        console.error(error);
+        } catch (error) {
 
-	        alert(
-	            "Failed to delete address."
-	        );
+            console.error(error);
 
-	    }
-	};
+            alert(
+                "Failed to delete address."
+            );
+
+        }
+
+    };
 
 
     return (
 
-        <div className="container mt-5">
+        <div className="container home-page">
 
             {/* HEADER */}
 
-            <div className="text-center">
+            <div className="home-header">
 
                 <h1 className="display-4">
                     🍽 Restaurant Ordering System
@@ -253,9 +235,7 @@ function Home() {
             </div>
 
 
-            {/* ================================================= */}
             {/* CUSTOMER HOME */}
-            {/* ================================================= */}
 
             {user && user.role === "CUSTOMER" && (
 
@@ -272,7 +252,6 @@ function Home() {
                                 <h4 className="mb-0">
                                     📍 My Addresses
                                 </h4>
-
 
                                 <button
                                     className="btn btn-primary"
@@ -300,13 +279,9 @@ function Home() {
                                             Add New Address
                                         </h5>
 
-
                                         <label className="form-label">
-
                                             Address Name
-
                                         </label>
-
 
                                         <input
                                             type="text"
@@ -320,13 +295,9 @@ function Home() {
                                             }
                                         />
 
-
                                         <label className="form-label">
-
                                             Address Description
-
                                         </label>
-
 
                                         <textarea
                                             className="form-control mb-3"
@@ -341,43 +312,31 @@ function Home() {
                                             maxLength="500"
                                         />
 
-
                                         <small className="text-muted d-block mb-3">
-
                                             Add details that will help
                                             with delivery.
-
                                         </small>
 
-
                                         <p className="text-muted">
-
                                             Your current GPS location
                                             will be saved with this
                                             address.
-
                                         </p>
-
 
                                         <button
                                             className="btn btn-success"
                                             onClick={addAddress}
                                             disabled={locationLoading}
                                         >
-
                                             {locationLoading
                                                 ? "Getting Location..."
                                                 : "📍 Use My Current Location"}
-
                                         </button>
-
 
                                         {locationError && (
 
                                             <div className="alert alert-danger mt-3">
-
                                                 {locationError}
-
                                             </div>
 
                                         )}
@@ -394,9 +353,7 @@ function Home() {
                             {addresses.length === 0 ? (
 
                                 <div className="alert alert-info mt-4">
-
                                     You don't have any saved addresses yet.
-
                                 </div>
 
                             ) : (
@@ -410,14 +367,13 @@ function Home() {
                                             key={address.id}
                                         >
 
-                                            <div className="card h-100">
+                                            <div className="card address-card">
 
                                                 <div className="card-body">
 
                                                     <h5>
                                                         📍 {address.label}
                                                     </h5>
-
 
                                                     <p className="mb-3">
 
@@ -431,7 +387,6 @@ function Home() {
 
                                                     </p>
 
-
                                                     <p className="text-muted">
 
                                                         Latitude:{" "}
@@ -444,30 +399,37 @@ function Home() {
 
                                                     </p>
 
+                                                    <div className="address-actions">
 
-                                                    <button
-                                                        className="btn btn-danger btn-sm"
-                                                        onClick={() =>
-                                                            deleteAddress(
-                                                                address.id
-                                                            )
-                                                        }
-                                                    >
-                                                        🗑 Delete
-                                                    </button>
-						    <button
-    							className={
-        						selectedAddress?.id === address.id
-            						? "btn btn-success"
-            						: "btn btn-primary"
-    							}
-    							onClick={() => 
-							  setSelectedAddress(address)}
-						    >
-    							{selectedAddress?.id === address.id
-        						? "✓ Selected"
-        						: "Select"}
-						    </button>
+                                                        <button
+                                                            className="btn btn-danger btn-sm"
+                                                            onClick={() =>
+                                                                deleteAddress(
+                                                                    address.id
+                                                                )
+                                                            }
+                                                        >
+                                                            🗑 Delete
+                                                        </button>
+
+                                                        <button
+                                                            className={
+                                                                selectedAddress?.id === address.id
+                                                                    ? "btn btn-success"
+                                                                    : "btn btn-primary"
+                                                            }
+                                                            onClick={() =>
+                                                                setSelectedAddress(
+                                                                    address
+                                                                )
+                                                            }
+                                                        >
+                                                            {selectedAddress?.id === address.id
+                                                                ? "✓ Selected"
+                                                                : "Select"}
+                                                        </button>
+
+                                                    </div>
 
                                                 </div>
 
@@ -492,7 +454,7 @@ function Home() {
 
                         <div className="col-md-6 mb-4">
 
-                            <div className="card shadow h-100 text-center">
+                            <div className="card shadow home-menu-card">
 
                                 <div className="card-body">
 
@@ -527,9 +489,7 @@ function Home() {
             )}
 
 
-            {/* ================================================= */}
             {/* ADMIN HOME */}
-            {/* ================================================= */}
 
             {user && user.role === "ADMIN" && (
 
@@ -539,7 +499,7 @@ function Home() {
 
                     <div className="col-md-4 mb-4">
 
-                        <div className="card shadow h-100 text-center">
+                        <div className="card shadow home-admin-card">
 
                             <div className="card-body">
 
@@ -572,7 +532,7 @@ function Home() {
 
                     <div className="col-md-4 mb-4">
 
-                        <div className="card shadow h-100 text-center">
+                        <div className="card shadow home-admin-card">
 
                             <div className="card-body">
 
@@ -605,7 +565,7 @@ function Home() {
 
                     <div className="col-md-4 mb-4">
 
-                        <div className="card shadow h-100 text-center">
+                        <div className="card shadow home-admin-card">
 
                             <div className="card-body">
 

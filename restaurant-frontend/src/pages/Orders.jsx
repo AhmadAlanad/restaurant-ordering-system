@@ -1,6 +1,9 @@
 import { useEffect, useState, useContext } from "react";
+
 import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
+
+import "../styles/orders.css";
 
 function Orders() {
 
@@ -36,7 +39,6 @@ function Orders() {
             setLoading(false);
 
         }
-
     };
 
     const getStatusColor = (status) => {
@@ -64,37 +66,31 @@ function Orders() {
             default:
                 return "secondary";
         }
-
     };
 
     if (loading) {
 
         return (
-
-            <div className="container mt-4">
+            <div className="container orders-page">
 
                 <h2>My Orders</h2>
 
                 <p>Loading...</p>
 
             </div>
-
         );
-
     }
 
     return (
 
-        <div className="container mt-4">
+        <div className="container orders-page">
 
             <h2>My Orders</h2>
 
             {orders.length === 0 ? (
 
                 <div className="alert alert-info">
-
                     You haven't placed any orders yet.
-
                 </div>
 
             ) : (
@@ -103,24 +99,22 @@ function Orders() {
 
                     <div
                         key={order.id}
-                        className="card mb-4 shadow"
+                        className="card shadow order-card"
                     >
 
                         <div className="card-body">
 
                             {/* HEADER */}
 
-                            <div className="d-flex justify-content-between align-items-center">
+                            <div className="order-header">
 
                                 <div>
 
                                     <h4>
-
                                         Order #{order.id}
-
                                     </h4>
 
-                                    <p className="text-muted mb-0">
+                                    <p className="text-muted order-date">
 
                                         {new Date(
                                             order.orderDate
@@ -131,11 +125,11 @@ function Orders() {
                                 </div>
 
                                 <span
-                                    className={`badge bg-${getStatusColor(order.status)}`}
+                                    className={`badge bg-${getStatusColor(
+                                        order.status
+                                    )}`}
                                 >
-
                                     {order.status}
-
                                 </span>
 
                             </div>
@@ -143,94 +137,108 @@ function Orders() {
                             <hr />
 
 
-							{/* DELIVERY ADDRESS */}
+                            {/* DELIVERY ADDRESS */}
 
-							<h5>
-							    📍 Delivery Address
-							</h5>
+                            <h5 className="order-section-title">
+                                📍 Delivery Address
+                            </h5>
 
-							<p className="mb-1">
-							    <strong>Name:</strong>{" "}
-							    {order.addressLabel}
-							</p>
+                            <p className="mb-1">
 
-							<p className="mb-1">
-							    <strong>Description:</strong>{" "}
-							    {order.addressDescription}
-							</p>
+                                <strong>Name:</strong>{" "}
+                                {order.addressLabel}
 
-							<hr />
+                            </p>
 
-							{/* PAYMENT */}
+                            <p className="mb-1">
 
-							<h5>
-							    💳 Payment Method
-							</h5>
+                                <strong>Description:</strong>{" "}
+                                {order.addressDescription}
 
-							<p>
-							    {order.paymentMethod === "CASH"
-							        ? "Cash"
-							        : "Credit Card"}
-							</p>
+                            </p>
 
-							{/* NOTE */}
+                            <hr />
 
-							{order.customerNote && (
-							    <>
-							        <h5>
-							            📝 Note
-							        </h5>
 
-							        <p>
-							            {order.customerNote}
-							        </p>
-							    </>
-							)}
+                            {/* PAYMENT */}
 
-							<hr />
+                            <h5 className="order-section-title">
+                                💳 Payment Method
+                            </h5>
+
+                            <p>
+
+                                {order.paymentMethod === "CASH"
+                                    ? "Cash"
+                                    : "Credit Card"}
+
+                            </p>
+
+
+                            {/* NOTE */}
+
+                            {order.customerNote && (
+
+                                <>
+
+                                    <h5 className="order-section-title">
+                                        📝 Note
+                                    </h5>
+
+                                    <p>
+                                        {order.customerNote}
+                                    </p>
+
+                                </>
+
+                            )}
+
+                            <hr />
 
 
                             {/* ITEMS */}
 
-                            <h5>
-
+                            <h5 className="order-section-title">
                                 🍽 Ordered Items
-
                             </h5>
 
                             <ul className="list-group mb-3">
 
-                                {order.items.map((item, index) => (
+                                {order.items.map(
+                                    (item, index) => (
 
-                                    <li
-                                        key={index}
-                                        className="list-group-item d-flex justify-content-between"
-                                    >
+                                        <li
+                                            key={index}
+                                            className="list-group-item d-flex justify-content-between"
+                                        >
 
-                                        <span>
+                                            <span>
 
-                                            {item.itemName}
+                                                {item.itemName}
+                                                {" × "}
+                                                {item.quantity}
 
-                                            {" × "}
+                                            </span>
 
-                                            {item.quantity}
+                                            <strong>
 
-                                        </span>
+                                                {item.price *
+                                                    item.quantity}{" "}
+                                                TL
 
-                                        <strong>
+                                            </strong>
 
-                                            {item.price * item.quantity} TL
+                                        </li>
 
-                                        </strong>
-
-                                    </li>
-
-                                ))}
+                                    )
+                                )}
 
                             </ul>
 
 
-                            <h4 className="text-end">
+                            {/* TOTAL */}
+
+                            <h4 className="order-total">
 
                                 Total: {order.totalPrice} TL
 
@@ -241,15 +249,11 @@ function Orders() {
 
                             {order.rejectionReason && (
 
-                                <div className="alert alert-danger mt-3">
+                                <div className="alert alert-danger order-rejection">
 
                                     <strong>
-
                                         Rejection Reason:
-
-                                    </strong>
-
-                                    {" "}
+                                    </strong>{" "}
 
                                     {order.rejectionReason}
 
@@ -266,9 +270,7 @@ function Orders() {
             )}
 
         </div>
-
     );
-
 }
 
 export default Orders;

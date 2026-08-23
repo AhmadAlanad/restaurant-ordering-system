@@ -1,0 +1,22 @@
+.menu-category-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.menu-cart-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.menu-cart-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+.menu-cart-count {
+    top: -5px;
+    right: -5px;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+import "../styles/dashboard.css";
 
 function Dashboard() {
 
@@ -169,6 +170,238 @@ const deliveredOrder = async (id) => {
 
 };
 
+const printOrder = () => {
+
+    const order = selectedOrder;
+
+    if (!order) {
+        return;
+    }
+
+    const printWindow = window.open(
+        "",
+        "_blank",
+        "width=800,height=900"
+    );
+
+    if (!printWindow) {
+        alert("Please allow pop-ups to print the order.");
+        return;
+    }
+
+    const itemsHtml = order.items.map(item => `
+        <tr>
+            <td>${item.itemName}</td>
+            <td style="text-align:center;">
+                ${item.quantity}
+            </td>
+            <td style="text-align:right;">
+                ${item.price} SR
+            </td>
+            <td style="text-align:right;">
+                ${item.price * item.quantity} SR
+            </td>
+        </tr>
+    `).join("");
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Order #${order.id}</title>
+
+            <style>
+
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 40px;
+                    color: #222;
+                }
+
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+
+                .header h1 {
+                    margin-bottom: 5px;
+                }
+
+                .order-info {
+                    margin-bottom: 25px;
+                }
+
+                .order-info p {
+                    margin: 6px 0;
+                }
+
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 15px;
+                }
+
+                th,
+                td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                }
+
+                th {
+                    background: #f2f2f2;
+                }
+
+                .total {
+                    text-align: right;
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin-top: 20px;
+                }
+
+                .note {
+                    margin-top: 25px;
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    background: #fff8dc;
+                }
+
+                .rejection {
+                    margin-top: 25px;
+                    padding: 15px;
+                    border: 1px solid #dc3545;
+                    background: #ffe6e6;
+                }
+
+                .footer {
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #777;
+                }
+
+                @media print {
+                    body {
+                        margin: 20px;
+                    }
+                }
+
+            </style>
+        </head>
+
+        <body>
+
+            <div class="header">
+                <h1>🍽 Restaurant</h1>
+                <h2>Order #${order.id}</h2>
+            </div>
+
+            <div class="order-info">
+
+                <p>
+                    <strong>Customer:</strong>
+                    ${order.customerName}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    ${order.customerPhone}
+                </p>
+
+                <p>
+                    <strong>Order Date:</strong>
+                    ${new Date(order.orderDate).toLocaleString()}
+                </p>
+
+                <p>
+                    <strong>Address:</strong>
+                    ${order.addressLabel || "N/A"}
+                </p>
+
+                <p>
+                    <strong>Description:</strong>
+                    ${order.addressDescription || "N/A"}
+                </p>
+
+                <p>
+                    <strong>Payment Method:</strong>
+                    ${order.paymentMethod === "CASH"
+                        ? "Cash"
+                        : "Credit Card"}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    ${order.status}
+                </p>
+
+            </div>
+
+            <h3>Order Items</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+
+            </table>
+
+            <div class="total">
+                Total: ${order.totalPrice} SR
+            </div>
+
+            ${
+                order.customerNote
+                    ? `
+                        <div class="note">
+                            <strong>Customer Note:</strong>
+                            <p>${order.customerNote}</p>
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${
+                order.rejectionReason
+                    ? `
+                        <div class="rejection">
+                            <strong>Rejection Reason:</strong>
+                            <p>${order.rejectionReason}</p>
+                        </div>
+                    `
+                    : ""
+            }
+
+            <div class="footer">
+                Thank you for your order.
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.focus();
+
+    printWindow.onload = () => {
+
+        printWindow.print();
+
+        printWindow.close();
+
+    };
+};
+
 		const getStatusBadge = (status) => {
 
     switch (status) {
@@ -257,10 +490,10 @@ const deliveredOrder = async (id) => {
 
         {orders.map(order => (
 
-    <div
-        key={order.id}
-        className="card mb-3"
-    >
+			<div
+			    key={order.id}
+			    className="card dashboard-order-card"
+			>
 
         <div className="card-body">
 
@@ -297,10 +530,7 @@ const deliveredOrder = async (id) => {
 
 {showOrderModal && selectedOrder && (
 
-<div
-    className="modal fade show d-block"
-    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
->
+	<div className="modal fade show d-block dashboard-modal">
 
     <div className="modal-dialog modal-lg">
 
@@ -320,7 +550,10 @@ const deliveredOrder = async (id) => {
 
             </div>
 
-            <div className="modal-body">
+			<div
+			    className="modal-body"
+			    id="print-order"
+			>
 
                 <p>
                     <strong>Customer:</strong> {selectedOrder.customerName}
@@ -373,7 +606,7 @@ const deliveredOrder = async (id) => {
 
                 <h5>Order Items</h5>
 
-                <ul className="list-group mb-3">
+                <ul className="list-group dashboard-order-items">
 
                     {selectedOrder.items.map((item, index) => (
 
@@ -402,9 +635,9 @@ const deliveredOrder = async (id) => {
 
 		{selectedOrder.customerNote && (
 
-    		<div className="alert alert-warning mt-3">
+    		<div className="alert alert-warning dashboard-customer-note">
 
-        		<h5>📝 Customer Note</h5>
+        		<h5>📝 Customer Note </h5>
 
         		<p className="mb-0">
             		{selectedOrder.customerNote}
@@ -416,7 +649,7 @@ const deliveredOrder = async (id) => {
 
                 {selectedOrder.rejectionReason && (
 
-                    <div className="alert alert-danger mt-3">
+                    <div className="alert alert-danger dashboard-rejection-reason">
 
                         <strong>Reason:</strong> {selectedOrder.rejectionReason}
 
@@ -472,6 +705,13 @@ const deliveredOrder = async (id) => {
             Delivered
         </button>
     )}
+	
+	<button
+	    className="btn btn-outline-dark"
+	    onClick={printOrder}
+	>
+	    🖨️ Print Order
+	</button>
 
     <button
         className="btn btn-secondary"

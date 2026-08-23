@@ -1,0 +1,13 @@
+.notification-dropdown-menu {
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-message {
+    white-space: normal;
+}
+
+.notification-date {
+    display: block;
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import "../styles/register.css";
 
 function Register() {
 
@@ -157,15 +158,11 @@ function Register() {
 
     return (
 
-        <div
-            className="container mt-5"
-            style={{ maxWidth: "500px" }}
-        >
+        <div className="container register-container">
 
-            <h2 className="mb-4">
-                Register
-            </h2>
-
+		<h2 className="register-title">
+		    Register
+		</h2>
             {errors.general && (
 
                 <div className="alert alert-danger">
@@ -199,7 +196,7 @@ function Register() {
                 )}
 
                 {!errors.fullName && (
-                    <div className="mb-3" />
+                    <div className="register-field" />
                 )}
 
 
@@ -227,7 +224,7 @@ function Register() {
                 )}
 
                 {!errors.email && (
-                    <div className="mb-3" />
+                    <div className="register-field" />
                 )}
 
 
@@ -255,7 +252,7 @@ function Register() {
                 )}
 
                 {!errors.password && (
-                    <div className="mb-3" />
+                    <div className="register-field" />
                 )}
 
 
@@ -278,7 +275,7 @@ function Register() {
 	)}
 
 	{!errors.confirmPassword && (
-    	<div className="mb-3" />
+    	<div className="register-field" />
 	)}
 
 
@@ -305,7 +302,7 @@ function Register() {
                 )}
 
                 {!errors.phone && (
-                    <div className="mb-3" />
+                    <div className="register-field" />
                 )}
 
 

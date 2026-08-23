@@ -1,9 +1,14 @@
 import { useContext, useEffect, useState } from "react";
+
 import api from "../services/api";
 import MenuCard from "../components/MenuCard";
+
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
+
 import { useNavigate } from "react-router-dom";
+
+import "../styles/menu.css";
 
 function Menu() {
 
@@ -17,8 +22,10 @@ function Menu() {
     const navigate = useNavigate();
 
     useEffect(() => {
+
         loadMenuItems();
         loadCategories();
+
     }, []);
 
     const loadMenuItems = async () => {
@@ -61,13 +68,13 @@ function Menu() {
             : item.category?.id === selectedCategory
     );
 
-	const categoryColors = [
-    "btn-danger",
-    "btn-success",
-    "btn-warning",
-    "btn-info",
-    "btn-primary",
-    "btn-secondary"
+    const categoryColors = [
+        "btn-danger",
+        "btn-success",
+        "btn-warning",
+        "btn-info",
+        "btn-primary",
+        "btn-secondary"
     ];
 
     return (
@@ -76,19 +83,11 @@ function Menu() {
 
             <div className="row">
 
-                {/* =========================
-                    CATEGORIES SIDEBAR
-                ========================== */}
+                {/* CATEGORIES SIDEBAR */}
 
                 <div className="col-md-3 col-lg-2 mb-4">
 
-                    <div
-                        className="card shadow"
-                        style={{
-                            position: "sticky",
-                            top: "20px"
-                        }}
-                    >
+                    <div className="card shadow menu-category-sidebar">
 
                         <div className="card-body">
 
@@ -104,34 +103,49 @@ function Menu() {
                                         ? "btn-primary"
                                         : "btn-outline-primary"
                                 }`}
-                                onClick={() => setSelectedCategory(null)}
+                                onClick={() =>
+                                    setSelectedCategory(null)
+                                }
                             >
                                 ⭐ All
                             </button>
 
-
                             {/* CATEGORIES */}
 
-                            {categories.map((category, index) => (
+                            {categories.map((category, index) => {
 
-                                <button
-    key={category.id}
-    className={`btn w-100 text-start mb-2 ${
-        selectedCategory === category.id
-            ? categoryColors[index % categoryColors.length]
-            : `btn-outline-${categoryColors[index % categoryColors.length].replace(
-                "btn-",
-                ""
-            )}`
-    }`}
-    onClick={() =>
-        setSelectedCategory(category.id)
-    }
->
-    {category.name}
-</button>
+                                const color =
+                                    categoryColors[
+                                        index % categoryColors.length
+                                    ];
 
-                            ))}
+                                const outlineColor =
+                                    color.replace(
+                                        "btn-",
+                                        "btn-outline-"
+                                    );
+
+                                return (
+
+                                    <button
+                                        key={category.id}
+                                        className={`btn w-100 text-start mb-2 ${
+                                            selectedCategory === category.id
+                                                ? color
+                                                : outlineColor
+                                        }`}
+                                        onClick={() =>
+                                            setSelectedCategory(
+                                                category.id
+                                            )
+                                        }
+                                    >
+                                        {category.name}
+                                    </button>
+
+                                );
+
+                            })}
 
                         </div>
 
@@ -140,25 +154,26 @@ function Menu() {
                 </div>
 
 
-                
+                {/* MENU */}
 
                 <div className="col-md-9 col-lg-10">
 
                     <div className="d-flex justify-content-between align-items-center mb-4">
 
                         <h2>
+
                             {selectedCategory === null
+
                                 ? "Menu"
+
                                 : categories.find(
                                     category =>
                                         category.id === selectedCategory
                                 )?.name
+
                             }
+
                         </h2>
-
-                       
-
-                        
 
                     </div>
 
@@ -198,48 +213,35 @@ function Menu() {
 
             </div>
 
-{user && user.role === "CUSTOMER" && (
 
-    <div
-        className="position-fixed"
-        style={{
-            bottom: "30px",
-            right: "30px",
-            zIndex: 1000
-        }}
-    >
+            {/* FLOATING CART BUTTON */}
 
-        <button
-            className="btn btn-primary rounded-circle shadow"
-            style={{
-                width: "60px",
-                height: "60px",
-                fontSize: "24px"
-            }}
-            onClick={() => navigate("/cart")}
-        >
+            {user && user.role === "CUSTOMER" && (
 
-            🛒
+                <div className="menu-cart-button">
 
-            {cartItems.length > 0 && (
+                    <button
+                        className="btn btn-primary rounded-circle shadow menu-cart-icon"
+                        onClick={() => navigate("/cart")}
+                    >
 
-                <span
-                    className="badge bg-danger position-absolute"
-                    style={{
-                        top: "-5px",
-                        right: "-5px"
-                    }}
-                >
-                    {cartItems.length}
-                </span>
+                        🛒
+
+                        {cartItems.length > 0 && (
+
+                            <span className="badge bg-danger position-absolute menu-cart-count">
+
+                                {cartItems.length}
+
+                            </span>
+
+                        )}
+
+                    </button>
+
+                </div>
 
             )}
-
-        </button>
-
-    </div>
-
-)}
 
         </div>
 

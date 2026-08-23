@@ -48,7 +48,8 @@ public class SecurityConfig {
                 // Authentication endpoints
                 .requestMatchers(
                     "/api/users/register",
-                    "/api/users/login"
+                    "/api/users/login",
+                    "/images/**"
                 ).permitAll()
 
                 // Swagger / OpenAPI

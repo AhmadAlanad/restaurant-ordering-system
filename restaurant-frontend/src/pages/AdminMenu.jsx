@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import "../styles/AdminMenu.css";
 
 function AdminMenu() {
 
@@ -292,9 +293,9 @@ const saveCategory = async () => {
 
     return (
 
-        <div className="container mt-4">
+        <div className="container admin-menu">
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex justify-content-between align-items-center admin-menu-header">
 
     <h2>Menu Management</h2>
 
@@ -315,13 +316,12 @@ const saveCategory = async () => {
 
     <div className="col-md-3 mb-3">
 
-        <div
-            className={`card text-center ${
-                selectedCategory === null ? "border-primary" : ""
-            }`}
-            style={{ cursor: "pointer" }}
-            onClick={() => setSelectedCategory(null)}
-        >
+	<div
+	    className={`card text-center admin-category-card ${
+	        selectedCategory === null ? "selected" : ""
+	    }`}
+	    onClick={() => setSelectedCategory(null)}
+	>
 
             <div className="card-body">
 
@@ -340,15 +340,14 @@ const saveCategory = async () => {
             key={category.id}
         >
 
-            <div
-                className={`card text-center ${
-                    selectedCategory === category.id
-                        ? "border-primary"
-                        : ""
-                }`}
-                style={{ cursor: "pointer" }}
-                onClick={() => setSelectedCategory(category.id)}
-            >
+		<div
+		    className={`card text-center admin-category-card ${
+		        selectedCategory === category.id
+		            ? "selected"
+		            : ""
+		    }`}
+		    onClick={() => setSelectedCategory(category.id)}
+		>
 
                 <div className="card-body">
 
@@ -424,17 +423,13 @@ const saveCategory = async () => {
     key={item.id}
 >
 
-    <div className="card h-100 shadow-sm">
+    <div className="card admin-menu-item-card shadow-sm">
 
-        <img
-            src={`http://localhost:8081/images/${item.imageUrl}`}
-            className="card-img-top"
-            alt={item.name}
-            style={{
-                height: "220px",
-                objectFit: "cover"
-            }}
-        />
+	<img
+	    src={`http://localhost:8081/images/${item.imageUrl}`}
+	    className="card-img-top admin-menu-item-image"
+	    alt={item.name}
+	/>
 
         <div className="card-body">
 
@@ -460,10 +455,10 @@ const saveCategory = async () => {
 
         </div>
 
-        <div className="card-footer">
+        <div className="card-footer admin-menu-item-footer">
 
             <button
-                className="btn btn-primary btn-sm me-2"
+                className="btn btn-primary btn-sm"
                 onClick={() => handleEdit(item)}
             >
                 Edit
@@ -494,10 +489,7 @@ const saveCategory = async () => {
 
 {showCategoryModal && (
 
-<div
-    className="modal d-block"
-    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
->
+<div className="modal d-block admin-modal">
 
     <div className="modal-dialog">
 
@@ -557,10 +549,7 @@ const saveCategory = async () => {
 
 {showItemModal && (
 
-<div
-    className="modal d-block"
-    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
->
+<div className="modal d-block admin-modal">
 
     <div className="modal-dialog modal-lg">
 
@@ -638,19 +627,18 @@ const saveCategory = async () => {
 
 {editingItem?.options?.map(option => (
 
-    <div
-        key={option.id}
-        className="d-flex justify-content-between align-items-center mb-2"
-    >
+	<div
+	    key={option.id}
+	    className="admin-option-row"
+	>
 
         <span>
             {option.name} - {option.price} SR
         </span>
 
-        <div>
-
-            <button
-                className="btn btn-warning btn-sm me-2"
+		<div className="admin-option-actions">
+		    <button
+		        className="btn btn-warning btn-sm"
                 onClick={() => {
 
                     setEditingOption(option);
@@ -679,7 +667,7 @@ const saveCategory = async () => {
 
 ))}
 
-<div className="row mt-3">
+<div className="row admin-option-form">
 
     <div className="col">
 

@@ -1,46 +1,20 @@
-package com.restaurant.entity;
+package com.restaurant.dto;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+public class NotificationResponseDTO {
 
-@Entity
-@Table(name = "notifications")
-public class Notification {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(nullable = false)
     private String message;
-
-    @Column(nullable = false)
     private String type;
-
-    @Column(nullable = false)
-    private boolean isRead = false;
-
-    @Column(nullable = false)
+    private boolean read;
     private LocalDateTime createdAt;
 
-    public Notification() {
+    public NotificationResponseDTO() {
     }
 
     public Long getId() {
         return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public void setId(Long id) {
@@ -64,11 +38,11 @@ public class Notification {
     }
 
     public boolean isRead() {
-        return isRead;
+        return read;
     }
 
     public void setRead(boolean read) {
-        isRead = read;
+        this.read = read;
     }
 
     public LocalDateTime getCreatedAt() {

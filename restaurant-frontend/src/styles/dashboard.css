@@ -1,0 +1,23 @@
+/* =========================
+   Admin Dashboard
+   ========================= */
+
+.dashboard-modal {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-order-card {
+    margin-bottom: 1rem;
+}
+
+.dashboard-order-items {
+    margin-bottom: 1rem;
+}
+
+.dashboard-customer-note {
+    margin-top: 1rem;
+}
+
+.dashboard-rejection-reason {
+    margin-top: 1rem;
+}

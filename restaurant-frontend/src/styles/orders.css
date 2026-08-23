@@ -1,0 +1,29 @@
+.orders-page {
+    margin-top: 1.5rem;
+}
+
+.order-card {
+    margin-bottom: 1.5rem;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-date {
+    margin-bottom: 0;
+}
+
+.order-section-title {
+    margin-bottom: 0.75rem;
+}
+
+.order-total {
+    text-align: right;
+}
+
+.order-rejection {
+    margin-top: 1rem;
+}

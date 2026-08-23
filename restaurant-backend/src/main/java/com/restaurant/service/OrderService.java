@@ -23,6 +23,9 @@ import com.restaurant.repository.MenuItemOptionRepository;
 import com.restaurant.repository.MenuItemRepository;
 import com.restaurant.repository.OrderRepository;
 import com.restaurant.repository.UserRepository;
+import com.restaurant.entity.Notification;
+import com.restaurant.enums.Role;
+import com.restaurant.repository.NotificationRepository;
 
 @Service
 public class OrderService {
@@ -38,6 +41,9 @@ public class OrderService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private NotificationRepository notificationRepository;
 
 
     public Order placeOrder(OrderRequestDTO request) {
@@ -93,45 +99,58 @@ public class OrderService {
                     );
 
 
-            MenuItemOption option =
-                    optionRepository.findById(
-                            itemRequest.getOptionId()
-                    )
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "Option not found"
-                            )
-                    );
+            MenuItemOption option = null;
+            double itemPrice;
 
+            if (itemRequest.getOptionId() != null) {
 
-            // Make sure the selected option
-            // belongs to the selected menu item.
-            if (!option.getMenuItem().getId()
-                    .equals(menuItem.getId())) {
-
-                throw new IllegalArgumentException(
-                        "Selected option does not belong to this menu item"
+                option = optionRepository.findById(
+                        itemRequest.getOptionId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Option not found"
+                        )
                 );
+
+                // Make sure the selected option
+                // belongs to the selected menu item.
+                if (!option.getMenuItem().getId()
+                        .equals(menuItem.getId())) {
+
+                    throw new IllegalArgumentException(
+                            "Selected option does not belong to this menu item"
+                    );
+                }
+
+                // Use option price
+                itemPrice = option.getPrice();
+
+            } else {
+
+                // Menu item has no option.
+                // Use the menu item's normal price.
+                itemPrice = menuItem.getPrice();
             }
 
 
             OrderItem orderItem = new OrderItem();
 
             orderItem.setMenuItem(menuItem);
+
             orderItem.setOption(option);
+
             orderItem.setQuantity(
                     itemRequest.getQuantity()
             );
 
-            // Use the price stored in the database.
-            orderItem.setPrice(option.getPrice());
+            orderItem.setPrice(itemPrice);
 
             orderItem.setOrder(order);
 
 
             totalPrice +=
-                    option.getPrice()
-                    * itemRequest.getQuantity();
+                    itemPrice *
+                    itemRequest.getQuantity();
 
 
             orderItems.add(orderItem);
@@ -142,7 +161,32 @@ public class OrderService {
         order.setTotalPrice(totalPrice);
 
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+
+        for (User admin : admins) {
+
+            Notification notification = new Notification();
+
+            notification.setUser(admin);
+
+            notification.setMessage(
+                    "New order #" + savedOrder.getId()
+                    + " received from "
+                    + savedOrder.getCustomerName()
+            );
+
+            notification.setType("NEW_ORDER");
+
+            notification.setRead(false);
+
+            notification.setCreatedAt(LocalDateTime.now());
+
+            notificationRepository.save(notification);
+        }
+
+        return savedOrder;
     }
 
 
@@ -198,7 +242,15 @@ public class OrderService {
 
         order.setStatus(OrderStatus.ACCEPTED);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        createOrderStatusNotification(
+                savedOrder,
+                "Your order #" + savedOrder.getId()
+                + " has been accepted."
+        );
+
+        return savedOrder;
     }
 
 
@@ -214,7 +266,16 @@ public class OrderService {
                 rejectRequest.getReason()
         );
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        createOrderStatusNotification(
+                savedOrder,
+                "Your order #" + savedOrder.getId()
+                + " has been rejected. Reason: "
+                + savedOrder.getRejectionReason()
+        );
+
+        return savedOrder;
     }
 
 
@@ -224,7 +285,15 @@ public class OrderService {
 
         order.setStatus(OrderStatus.PREPARING);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        createOrderStatusNotification(
+                savedOrder,
+                "Your order #" + savedOrder.getId()
+                + " is being prepared."
+        );
+
+        return savedOrder;
     }
 
 
@@ -234,7 +303,15 @@ public class OrderService {
 
         order.setStatus(OrderStatus.READY);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        createOrderStatusNotification(
+                savedOrder,
+                "Your order #" + savedOrder.getId()
+                + " is ready for pickup/delivery."
+        );
+
+        return savedOrder;
     }
 
 
@@ -244,7 +321,15 @@ public class OrderService {
 
         order.setStatus(OrderStatus.DELIVERED);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        createOrderStatusNotification(
+                savedOrder,
+                "Your order #" + savedOrder.getId()
+                + " has been delivered."
+        );
+
+        return savedOrder;
     }
     
     private User getAuthenticatedUser() {
@@ -269,5 +354,20 @@ public class OrderService {
                                 "Order not found"
                         )
                 );
+    }
+    
+    private void createOrderStatusNotification(
+            Order order,
+            String message) {
+
+        Notification notification = new Notification();
+
+        notification.setUser(order.getUser());
+        notification.setMessage(message);
+        notification.setType("ORDER_STATUS");
+        notification.setRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        notificationRepository.save(notification);
     }
 }

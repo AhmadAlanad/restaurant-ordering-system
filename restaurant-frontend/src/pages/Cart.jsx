@@ -1,8 +1,12 @@
-import { useEffect, useState, useContext } from "react";
+import { useState, useContext } from "react";
+
 import { CartContext } from "../context/CartContext";
 import api from "../services/api";
+
 import { AuthContext } from "../context/AuthContext";
 import { AddressContext } from "../context/AddressContext";
+
+import "../styles/cart.css";
 
 function Cart() {
 
@@ -16,17 +20,17 @@ function Cart() {
 
     const { user } = useContext(AuthContext);
 
-
     const [customerNote, setCustomerNote] = useState("");
-
     const [paymentMethod, setPaymentMethod] = useState("");
 
-    const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
+    const {
+        selectedAddress,
+        setSelectedAddress
+    } = useContext(AddressContext);
 
-
-    
 
     // Calculate cart total
+
     const totalPrice = cartItems.reduce(
         (total, item) =>
             total +
@@ -37,18 +41,18 @@ function Cart() {
 
 
     // Place order
+
     const placeOrder = async () => {
 
-if (!selectedAddress) {
+        if (!selectedAddress) {
 
-    alert(
-        "Please select a delivery address from the Home page."
-    );
+            alert(
+                "Please select a delivery address from the Home page."
+            );
 
-    return;
-}
+            return;
+        }
 
-        // Check payment method
         if (!paymentMethod) {
 
             alert(
@@ -58,30 +62,33 @@ if (!selectedAddress) {
             return;
         }
 
-
         const order = {
 
-    userId: user.id,
+            userId: user.id,
 
-    customerNote: customerNote,
+            customerNote: customerNote,
 
-    paymentMethod: paymentMethod,
+            paymentMethod: paymentMethod,
 
-    latitude: selectedAddress.latitude,
+            latitude: selectedAddress.latitude,
 
-    longitude: selectedAddress.longitude,
-	
-	addressLabel: selectedAddress.label,
+            longitude: selectedAddress.longitude,
 
-    addressDescription: selectedAddress.description,
+            addressLabel: selectedAddress.label,
 
-    items: cartItems.map(item => ({
-        menuItemId: item.id,
-        optionId: item.selectedOption.id,
-        quantity: item.quantity
-    }))
+            addressDescription: selectedAddress.description,
 
-};
+            items: cartItems.map(item => ({
+
+                menuItemId: item.id,
+
+                optionId: item.selectedOption.id,
+
+                quantity: item.quantity
+
+            }))
+
+        };
 
 
         try {
@@ -91,11 +98,9 @@ if (!selectedAddress) {
                 order
             );
 
-
             alert(
                 "Order placed successfully!"
             );
-
 
             clearCart();
 
@@ -105,7 +110,6 @@ if (!selectedAddress) {
 
             setSelectedAddress(null);
 
-
         } catch (error) {
 
             console.error(error);
@@ -114,7 +118,6 @@ if (!selectedAddress) {
                 "Response:",
                 error.response
             );
-
 
             if (error.response) {
 
@@ -129,15 +132,13 @@ if (!selectedAddress) {
                 alert(error.message);
 
             }
-
         }
-
     };
 
 
     return (
 
-        <div className="container mt-4">
+        <div className="container cart-page">
 
             <h2>Shopping Cart</h2>
 
@@ -161,7 +162,7 @@ if (!selectedAddress) {
 
                             <div
                                 key={index}
-                                className="card mb-3"
+                                className="card cart-item"
                             >
 
                                 <div className="card-body">
@@ -170,47 +171,28 @@ if (!selectedAddress) {
                                         {item.name}
                                     </h5>
 
-
                                     <p className="text-muted">
-
                                         {item.selectedOption?.name}
-
                                     </p>
 
-
                                     <p>
-
                                         Price:{" "}
-
-                                        {
-                                            item.selectedOption?.price
-                                        }{" "}
-
+                                        {item.selectedOption?.price}{" "}
                                         TL
-
                                     </p>
 
-
                                     <p>
-
                                         Quantity:{" "}
-
                                         {item.quantity}
-
                                     </p>
 
-
                                     <p>
-
                                         Subtotal:{" "}
-
                                         {
                                             item.selectedOption?.price *
                                             item.quantity
                                         }{" "}
-
                                         TL
-
                                     </p>
 
 
@@ -228,7 +210,6 @@ if (!selectedAddress) {
                                             +
                                         </button>
 
-
                                         <button
                                             className="btn btn-warning"
                                             onClick={() =>
@@ -240,7 +221,6 @@ if (!selectedAddress) {
                                         >
                                             -
                                         </button>
-
 
                                         <button
                                             className="btn btn-danger"
@@ -269,7 +249,7 @@ if (!selectedAddress) {
 
                     {/* TOTAL */}
 
-                    <h3 className="text-end">
+                    <h3 className="cart-total">
 
                         Total: {totalPrice} TL
 
@@ -278,73 +258,80 @@ if (!selectedAddress) {
 
                     {/* DELIVERY INFORMATION */}
 
-                    <div className="card mt-4">
+                    <div className="card cart-section">
 
-    <div className="card-body">
+                        <div className="card-body">
 
-        <h3>Delivery Information</h3>
+                            <h3>
+                                Delivery Information
+                            </h3>
 
-        {selectedAddress ? (
+                            {selectedAddress ? (
 
-            <>
+                                <>
 
-                <p>
-                    <strong>📍 Address:</strong>{" "}
-                    {selectedAddress.label}
-                </p>
+                                    <p>
 
-                <p>
-                    <strong>
-                        Address Description:
-                    </strong>
-                    <br />
-                    {selectedAddress.description}
-                </p>
+                                        <strong>
+                                            📍 Address:
+                                        </strong>{" "}
 
-                <p className="text-muted">
+                                        {selectedAddress.label}
 
-                    Latitude:{" "}
-                    {selectedAddress.latitude}
+                                    </p>
 
-                    <br />
+                                    <p>
 
-                    Longitude:{" "}
-                    {selectedAddress.longitude}
+                                        <strong>
+                                            Address Description:
+                                        </strong>
 
-                </p>
+                                        <br />
 
-            </>
+                                        {selectedAddress.description}
 
-        ) : (
+                                    </p>
 
-            <div className="alert alert-warning">
+                                    <p className="cart-address-coordinates">
 
-                Please select a delivery address
-                from the Home page before placing
-                your order.
+                                        Latitude:{" "}
+                                        {selectedAddress.latitude}
 
-            </div>
+                                        <br />
 
-        )}
+                                        Longitude:{" "}
+                                        {selectedAddress.longitude}
 
-    </div>
+                                    </p>
 
-</div>
+                                </>
+
+                            ) : (
+
+                                <div className="alert alert-warning">
+
+                                    Please select a delivery address
+                                    from the Home page before placing
+                                    your order.
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+                    </div>
 
 
                     {/* CUSTOMER NOTE */}
 
-                    <div className="card mt-4">
+                    <div className="card cart-section">
 
                         <div className="card-body">
 
                             <h5>
-
-                                Note
-                                ملاحظة
-
+                                Note ملاحظة
                             </h5>
-
 
                             <textarea
                                 className="form-control"
@@ -359,8 +346,7 @@ if (!selectedAddress) {
                                 maxLength="500"
                             />
 
-
-                            <small className="text-muted">
+                            <small className="text-muted cart-note-limit">
 
                                 Optional. Maximum 500 characters.
 
@@ -373,14 +359,13 @@ if (!selectedAddress) {
 
                     {/* PAYMENT METHOD */}
 
-                    <div className="card mt-4">
+                    <div className="card cart-section">
 
                         <div className="card-body">
 
                             <h4>
                                 Payment Method
                             </h4>
-
 
                             <div className="form-check">
 
@@ -391,8 +376,7 @@ if (!selectedAddress) {
                                     id="cash"
                                     value="CASH"
                                     checked={
-                                        paymentMethod ===
-                                        "CASH"
+                                        paymentMethod === "CASH"
                                     }
                                     onChange={(e) =>
                                         setPaymentMethod(
@@ -400,7 +384,6 @@ if (!selectedAddress) {
                                         )
                                     }
                                 />
-
 
                                 <label
                                     className="form-check-label"
@@ -431,7 +414,6 @@ if (!selectedAddress) {
                                     }
                                 />
 
-
                                 <label
                                     className="form-check-label"
                                     htmlFor="creditCard"
@@ -448,7 +430,7 @@ if (!selectedAddress) {
 
                     {/* PLACE ORDER */}
 
-                    <div className="text-end mt-4 mb-5">
+                    <div className="cart-place-order">
 
                         <button
                             className="btn btn-primary btn-lg"

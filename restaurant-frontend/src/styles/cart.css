@@ -1,0 +1,29 @@
+.cart-page {
+    margin-top: 1.5rem;
+}
+
+.cart-item {
+    margin-bottom: 1rem;
+}
+
+.cart-total {
+    text-align: right;
+}
+
+.cart-section {
+    margin-top: 1.5rem;
+}
+
+.cart-place-order {
+    text-align: right;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.cart-address-coordinates {
+    color: #6c757d;
+}
+
+.cart-note-limit {
+    display: block;
+}

@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import "../styles/login.css";
 
 function Login() {
 
@@ -101,14 +102,11 @@ function Login() {
 
     return (
 
-        <div
-            className="container mt-5"
-            style={{ maxWidth: "500px" }}
-        >
+        <div className="container login-container">
 
-            <h2 className="mb-4">
-                Login
-            </h2>
+		<h2 className="login-title">
+		    Login
+		</h2>
 
             {errors.general && (
 
@@ -141,7 +139,7 @@ function Login() {
 
                 )}
 
-                {!errors.email && <div className="mb-3" />}
+                {!errors.email && <div className="login-field" />}
 
 
                 {/* PASSWORD */}
@@ -165,7 +163,7 @@ function Login() {
 
                 )}
 
-                {!errors.password && <div className="mb-3" />}
+                {!errors.password && <div className="login-field" />}
 
 
                 <button
