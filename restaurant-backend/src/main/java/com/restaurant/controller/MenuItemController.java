@@ -1,6 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
+import java.util.UUID;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +25,13 @@ public class MenuItemController {
     }
     
     @PutMapping("/{id}/toggle")
-    public MenuItem toggleAvailability(@PathVariable Long id) {
+    public MenuItem toggleAvailability(@PathVariable UUID id) {
 
         return menuItemService.toggleAvailability(id);
     }
     
     @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@PathVariable Long id,
+    public MenuItem updateMenuItem(@PathVariable UUID id,
             @Valid @RequestBody MenuItem menuItem) {
 
         return menuItemService.updateMenuItem(id, menuItem);
@@ -43,7 +44,7 @@ public class MenuItemController {
     }
     
     @GetMapping("/{id}")
-    public MenuItem getMenuItemById(@PathVariable Long id) {
+    public MenuItem getMenuItemById(@PathVariable UUID id) {
 
         return menuItemService.getMenuItemById(id);
 
@@ -58,7 +59,7 @@ public class MenuItemController {
     
     @GetMapping("/category/{id}")
     public List<MenuItem> getByCategory(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return menuItemService.getByCategory(id);
     }

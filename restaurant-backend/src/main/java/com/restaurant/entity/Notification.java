@@ -1,16 +1,16 @@
 package com.restaurant.entity;
 
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "notifications")
 public class Notification {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -31,10 +31,15 @@ public class Notification {
     public Notification() {
     }
 
-    public Long getId() {
+
+    public UUID getId() {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+    
     public User getUser() {
         return user;
     }
@@ -43,9 +48,6 @@ public class Notification {
         this.user = user;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getMessage() {
         return message;

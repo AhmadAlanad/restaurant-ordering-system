@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +41,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderResponseDTO getOrderById(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return OrderMapper.toDTO(
                 orderService.getOrderById(id)
@@ -50,7 +50,7 @@ public class OrderController {
 
     @GetMapping("/user/{userId}")
     public List<OrderResponseDTO> getOrdersByUser(
-            @PathVariable Long userId) {
+            @PathVariable UUID userId) {
 
         return orderService.getOrdersByUser(userId)
                 .stream()
@@ -60,7 +60,7 @@ public class OrderController {
 
     @PutMapping("/{id}/accept")
     public OrderResponseDTO acceptOrder(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return OrderMapper.toDTO(
                 orderService.acceptOrder(id)
@@ -69,7 +69,7 @@ public class OrderController {
 
     @PutMapping("/{id}/reject")
     public OrderResponseDTO rejectOrder(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody RejectOrderDTO rejectRequest) {
 
         return OrderMapper.toDTO(
@@ -79,7 +79,7 @@ public class OrderController {
 
     @PutMapping("/{id}/preparing")
     public OrderResponseDTO preparingOrder(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return OrderMapper.toDTO(
                 orderService.preparingOrder(id)
@@ -88,7 +88,7 @@ public class OrderController {
 
     @PutMapping("/{id}/ready")
     public OrderResponseDTO readyOrder(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return OrderMapper.toDTO(
                 orderService.readyOrder(id)
@@ -97,7 +97,7 @@ public class OrderController {
 
     @PutMapping("/{id}/delivered")
     public OrderResponseDTO deliveredOrder(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         return OrderMapper.toDTO(
                 orderService.deliveredOrder(id)

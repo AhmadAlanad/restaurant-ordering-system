@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +32,7 @@ public class NotificationController {
 
     @PutMapping("/{id}/read")
     public void markAsRead(
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         notificationService.markAsRead(id);
     }

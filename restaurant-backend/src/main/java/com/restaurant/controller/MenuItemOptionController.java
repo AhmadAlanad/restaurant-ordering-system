@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ public class MenuItemOptionController {
 
     @GetMapping
     public List<MenuItemOption> getOptions(
-            @PathVariable Long menuItemId) {
+            @PathVariable UUID menuItemId) {
 
         return optionService.getOptions(menuItemId);
 
@@ -25,7 +25,7 @@ public class MenuItemOptionController {
 
     @PostMapping
     public MenuItemOption addOption(
-            @PathVariable Long menuItemId,
+            @PathVariable UUID menuItemId,
             @RequestBody MenuItemOption option) {
 
         return optionService.addOption(menuItemId, option);
@@ -33,7 +33,7 @@ public class MenuItemOptionController {
     }
     
     @DeleteMapping("/{id}")
-    public void deleteOption(@PathVariable Long id) {
+    public void deleteOption(@PathVariable UUID id) {
 
         optionService.deleteOption(id);
 
@@ -41,7 +41,7 @@ public class MenuItemOptionController {
     
     @PutMapping("/{id}")
     public MenuItemOption updateOption(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody MenuItemOption option) {
 
         return optionService.updateOption(id, option);

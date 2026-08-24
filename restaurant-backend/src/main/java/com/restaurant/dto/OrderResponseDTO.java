@@ -1,6 +1,7 @@
 package com.restaurant.dto;
 
 import java.util.List;
+import java.util.UUID;
 import java.time.LocalDateTime;
 import com.restaurant.enums.OrderStatus;
 import com.restaurant.enums.PaymentMethod;
@@ -8,7 +9,7 @@ import com.restaurant.enums.PaymentMethod;
 
 public class OrderResponseDTO {
 
-    private Long id;
+	private UUID id;
 
     private String customerName;
 
@@ -39,11 +40,11 @@ public class OrderResponseDTO {
     public OrderResponseDTO() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

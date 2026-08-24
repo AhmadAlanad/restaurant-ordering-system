@@ -5,13 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.UUID;
 
 @Entity
 public class MenuItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue
+	private UUID id;
 
     @NotBlank(message = "Menu item name is required")
     private String name;
@@ -40,7 +41,7 @@ public class MenuItem {
     public MenuItem() {
     }
 
-    public MenuItem(Long id, String name, String description, double price, String imageUrl, boolean available, Category category) {
+    public MenuItem(UUID id, String name, String description, double price, String imageUrl, boolean available, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -50,11 +51,11 @@ public class MenuItem {
         this.category = category;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

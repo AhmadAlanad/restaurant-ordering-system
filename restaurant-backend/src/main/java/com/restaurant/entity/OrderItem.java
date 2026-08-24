@@ -1,13 +1,14 @@
 package com.restaurant.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 public class OrderItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue
+	private UUID id;
 
     private int quantity;
 
@@ -29,13 +30,13 @@ public class OrderItem {
     public OrderItem() {
     }
 
-	public Long getId() {
-		return id;
-	}
+    public UUID getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
 	public int getQuantity() {
 		return quantity;

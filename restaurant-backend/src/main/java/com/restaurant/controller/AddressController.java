@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +20,7 @@ public class AddressController {
 
     @PostMapping("/{userId}")
     public AddressResponseDTO addAddress(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @Valid @RequestBody AddressRequestDTO request) {
 
         return addressService.addAddress(
@@ -31,7 +31,7 @@ public class AddressController {
 
     @GetMapping("/{userId}")
     public List<AddressResponseDTO> getUserAddresses(
-            @PathVariable Long userId) {
+            @PathVariable UUID userId) {
 
         return addressService.getUserAddresses(
                 userId);
@@ -40,8 +40,8 @@ public class AddressController {
 
     @DeleteMapping("/{userId}/{addressId}")
     public void deleteAddress(
-            @PathVariable Long userId,
-            @PathVariable Long addressId) {
+            @PathVariable UUID userId,
+            @PathVariable UUID addressId) {
 
         addressService.deleteAddress(
                 userId,

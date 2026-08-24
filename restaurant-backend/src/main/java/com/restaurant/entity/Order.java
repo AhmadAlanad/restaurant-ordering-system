@@ -1,7 +1,7 @@
 package com.restaurant.entity;
 
 import java.util.List;
-
+import java.util.UUID;
 import com.restaurant.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -12,9 +12,9 @@ import com.restaurant.enums.PaymentMethod;
 @Table(name = "orders")
 public class Order {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue
+	private UUID id;
 
     private String customerName;
 
@@ -55,13 +55,13 @@ public class Order {
     public Order() {
     }
 
-	public Long getId() {
-		return id;
-	}
+    public UUID getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
 	public String getCustomerName() {
 		return customerName;

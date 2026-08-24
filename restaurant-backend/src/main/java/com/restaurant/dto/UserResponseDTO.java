@@ -1,10 +1,11 @@
 package com.restaurant.dto;
 
 import com.restaurant.enums.Role;
+import java.util.UUID;
 
 public class UserResponseDTO {
 
-    private Long id;
+	private UUID id;
     private String fullName;
     private String email;
     private String phone;
@@ -14,11 +15,11 @@ public class UserResponseDTO {
     public UserResponseDTO() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

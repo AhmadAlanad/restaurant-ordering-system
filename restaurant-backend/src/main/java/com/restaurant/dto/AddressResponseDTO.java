@@ -1,8 +1,10 @@
 package com.restaurant.dto;
 
+import java.util.UUID;
+
 public class AddressResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String label;
     private Double latitude;
     private Double longitude;
@@ -11,11 +13,11 @@ public class AddressResponseDTO {
     public AddressResponseDTO() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

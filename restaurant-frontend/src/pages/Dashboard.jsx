@@ -292,7 +292,7 @@ const printOrder = () => {
 
             <div class="header">
                 <h1>🍽 Restaurant</h1>
-                <h2>Order #${order.id}</h2>
+                <h2>Order #${order.id.substring(0, 8)}</h2>
             </div>
 
             <div class="order-info">
@@ -499,7 +499,7 @@ const printOrder = () => {
 
             <div className="d-flex justify-content-between align-items-center">
 
-                <h4>Order #{order.id}</h4>
+                <h4>Order #{order.id.substring(0, 8)}</h4>
 
                 <span className={`badge ${getStatusBadge(order.status)}`}>
                     {order.status}
@@ -539,7 +539,7 @@ const printOrder = () => {
             <div className="modal-header">
 
                 <h5 className="modal-title">
-                    Order #{selectedOrder.id}
+                    Order #{selectedOrder.id.substring(0, 8)}
                 </h5>
 
                 <button

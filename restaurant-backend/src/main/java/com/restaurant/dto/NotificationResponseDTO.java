@@ -1,10 +1,11 @@
 package com.restaurant.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class NotificationResponseDTO {
 
-    private Long id;
+	private UUID id;
     private String message;
     private String type;
     private boolean read;
@@ -13,11 +14,11 @@ public class NotificationResponseDTO {
     public NotificationResponseDTO() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

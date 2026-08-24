@@ -1,6 +1,7 @@
 package com.restaurant.service;
 
 import java.util.List;
+import java.util.UUID;
 import com.restaurant.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
     
-    public Category updateCategory(Long id, Category updatedCategory) {
+    public Category updateCategory(UUID id, Category updatedCategory) {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->

@@ -3,7 +3,7 @@ package com.restaurant.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
@@ -172,10 +172,10 @@ public class OrderService {
             notification.setUser(admin);
 
             notification.setMessage(
-                    "New order #" + savedOrder.getId()
-                    + " received from "
-                    + savedOrder.getCustomerName()
-            );
+            	    "New order #" + savedOrder.getId().toString().substring(0, 8)
+            	    + " received from "
+            	    + savedOrder.getCustomerName()
+            	);
 
             notification.setType("NEW_ORDER");
 
@@ -190,7 +190,7 @@ public class OrderService {
     }
 
 
-    public Order getOrderById(Long id) {
+    public Order getOrderById(UUID id) {
 
         User authenticatedUser = getAuthenticatedUser();
 
@@ -221,7 +221,7 @@ public class OrderService {
     }
 
 
-    public List<Order> getOrdersByUser(Long userId) {
+    public List<Order> getOrdersByUser(UUID userId) {
 
         User authenticatedUser = getAuthenticatedUser();
 
@@ -236,7 +236,7 @@ public class OrderService {
     }
 
 
-    public Order acceptOrder(Long id) {
+    public Order acceptOrder(UUID id) {
 
         Order order = findOrderById(id);
 
@@ -246,7 +246,7 @@ public class OrderService {
 
         createOrderStatusNotification(
                 savedOrder,
-                "Your order #" + savedOrder.getId()
+                "Your order #" + savedOrder.getId().toString().substring(0, 8)
                 + " has been accepted."
         );
 
@@ -255,7 +255,7 @@ public class OrderService {
 
 
     public Order rejectOrder(
-            Long id,
+    		UUID id,
             RejectOrderDTO rejectRequest) {
 
         Order order = findOrderById(id);
@@ -270,7 +270,7 @@ public class OrderService {
 
         createOrderStatusNotification(
                 savedOrder,
-                "Your order #" + savedOrder.getId()
+                "Your order #" + savedOrder.getId().toString().substring(0, 8)
                 + " has been rejected. Reason: "
                 + savedOrder.getRejectionReason()
         );
@@ -279,7 +279,7 @@ public class OrderService {
     }
 
 
-    public Order preparingOrder(Long id) {
+    public Order preparingOrder(UUID id) {
 
         Order order = findOrderById(id);
 
@@ -289,7 +289,7 @@ public class OrderService {
 
         createOrderStatusNotification(
                 savedOrder,
-                "Your order #" + savedOrder.getId()
+                "Your order #" + savedOrder.getId().toString().substring(0, 8)
                 + " is being prepared."
         );
 
@@ -297,7 +297,7 @@ public class OrderService {
     }
 
 
-    public Order readyOrder(Long id) {
+    public Order readyOrder(UUID id) {
 
         Order order = findOrderById(id);
 
@@ -307,7 +307,7 @@ public class OrderService {
 
         createOrderStatusNotification(
                 savedOrder,
-                "Your order #" + savedOrder.getId()
+                "Your order #" + savedOrder.getId().toString().substring(0, 8)
                 + " is ready for pickup/delivery."
         );
 
@@ -315,7 +315,7 @@ public class OrderService {
     }
 
 
-    public Order deliveredOrder(Long id) {
+    public Order deliveredOrder(UUID id) {
 
         Order order = findOrderById(id);
 
@@ -325,7 +325,7 @@ public class OrderService {
 
         createOrderStatusNotification(
                 savedOrder,
-                "Your order #" + savedOrder.getId()
+                "Your order #" + savedOrder.getId().toString().substring(0, 8)
                 + " has been delivered."
         );
 
@@ -346,7 +346,7 @@ public class OrderService {
     }
 
 
-    private Order findOrderById(Long id) {
+    private Order findOrderById(UUID id) {
 
         return orderRepository.findById(id)
                 .orElseThrow(() ->

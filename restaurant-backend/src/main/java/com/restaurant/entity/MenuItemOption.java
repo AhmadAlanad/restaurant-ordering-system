@@ -1,5 +1,7 @@
 package com.restaurant.entity;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
@@ -7,8 +9,8 @@ import jakarta.persistence.*;
 public class MenuItemOption {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String name;
 
@@ -22,11 +24,11 @@ public class MenuItemOption {
     public MenuItemOption() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -53,5 +55,4 @@ public class MenuItemOption {
     public void setMenuItem(MenuItem menuItem) {
         this.menuItem = menuItem;
     }
-
 }

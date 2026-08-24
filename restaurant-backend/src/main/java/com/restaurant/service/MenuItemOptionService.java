@@ -1,6 +1,7 @@
 package com.restaurant.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,14 @@ public class MenuItemOptionService {
     @Autowired
     private MenuItemRepository menuItemRepository;
 
-    public List<MenuItemOption> getOptions(Long menuItemId) {
+    public List<MenuItemOption> getOptions(UUID menuItemId) {
 
         return optionRepository.findByMenuItemId(menuItemId);
 
     }
 
     public MenuItemOption addOption(
-            Long menuItemId,
+            UUID menuItemId,
             MenuItemOption option) {
 
         MenuItem menuItem = menuItemRepository.findById(menuItemId)
@@ -39,15 +40,15 @@ public class MenuItemOptionService {
         return optionRepository.save(option);
 
     }
-    
-    public void deleteOption(Long id) {
+
+    public void deleteOption(UUID id) {
 
         optionRepository.deleteById(id);
 
     }
-    
+
     public MenuItemOption updateOption(
-            Long id,
+    		UUID id,
             MenuItemOption updatedOption) {
 
         MenuItemOption option = optionRepository.findById(id)
@@ -58,7 +59,5 @@ public class MenuItemOptionService {
         option.setPrice(updatedOption.getPrice());
 
         return optionRepository.save(option);
-
     }
-
 }

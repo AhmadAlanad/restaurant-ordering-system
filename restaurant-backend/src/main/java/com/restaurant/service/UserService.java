@@ -1,5 +1,6 @@
 package com.restaurant.service;
 
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.restaurant.exception.ResourceNotFoundException;
@@ -113,7 +114,7 @@ public class UserService {
     }
     
     public void changePassword(
-            Long id,
+    		UUID id,
             ChangePasswordDTO request) {
 
         User authenticatedUser = getAuthenticatedUser();
@@ -144,7 +145,7 @@ public class UserService {
     
     
     public User getUserById(
-            Long id,
+    		UUID id,
             Authentication authentication) {
 
         User user = userRepository.findById(id)
@@ -164,7 +165,7 @@ public class UserService {
     }
     
     public User updateUser(
-            Long id,
+    		UUID id,
             User updatedUser,
             Authentication authentication) {
 

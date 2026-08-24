@@ -1,7 +1,7 @@
 package com.restaurant.controller;
 
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +29,7 @@ public class CategoryController {
     
     @PutMapping("/{id}")
     public Category updateCategory(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Category category) {
 
         return categoryService.updateCategory(id, category);

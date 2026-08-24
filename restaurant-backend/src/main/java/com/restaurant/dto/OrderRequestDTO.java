@@ -1,5 +1,6 @@
 package com.restaurant.dto;
 
+import java.util.UUID;
 import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,7 +13,7 @@ public class OrderRequestDTO {
 	@Valid
 	private List<OrderItemRequestDTO> items;
 	
-	private Long userId;
+	private UUID userId;
 	
 	private String customerNote;
 	
@@ -30,11 +31,11 @@ public class OrderRequestDTO {
     }
 
     
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

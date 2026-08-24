@@ -2,7 +2,7 @@ package com.restaurant.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,7 +42,7 @@ public class AddressService {
 
     // Add a new address
     public AddressResponseDTO addAddress(
-            Long userId,
+    		UUID userId,
             AddressRequestDTO request) {
 
     	User user = getAuthenticatedUser();
@@ -73,7 +73,7 @@ public class AddressService {
 
     // Get all addresses of a customer
     public List<AddressResponseDTO> getUserAddresses(
-            Long userId) {
+    		UUID userId) {
     	User authenticatedUser = getAuthenticatedUser();
 
     	if (!authenticatedUser.getId().equals(userId)
@@ -95,8 +95,8 @@ public class AddressService {
 
     // Delete an address
     public void deleteAddress(
-            Long userId,
-            Long addressId) {
+    		UUID userId,
+    		UUID addressId) {
 
         Address address =
                 addressRepository.findById(addressId)

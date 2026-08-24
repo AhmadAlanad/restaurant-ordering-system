@@ -2,7 +2,7 @@ package com.restaurant.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,7 +69,7 @@ public class NotificationService {
     }
 
 
-    public void markAsRead(Long notificationId) {
+    public void markAsRead(UUID notificationId) {
 
         User user = getAuthenticatedUser();
 

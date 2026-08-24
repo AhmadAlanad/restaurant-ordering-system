@@ -12,6 +12,7 @@ import com.restaurant.dto.ChangePasswordDTO;
 import jakarta.validation.Valid;
 import com.restaurant.dto.LoginResponseDTO;
 import org.springframework.security.core.Authentication;
+import java.util.UUID;
 
 
 @RestController
@@ -38,7 +39,7 @@ public class UserController {
     
     @GetMapping("/{id}")
     public UserResponseDTO getUserById(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             Authentication authentication) {
 
         return UserMapper.toDTO(
@@ -48,7 +49,7 @@ public class UserController {
     
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody User user,
             Authentication authentication) {
 
@@ -63,7 +64,7 @@ public class UserController {
     
     @PutMapping("/{id}/change-password")
     public void changePassword(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody ChangePasswordDTO request) {
 
         userService.changePassword(id, request);

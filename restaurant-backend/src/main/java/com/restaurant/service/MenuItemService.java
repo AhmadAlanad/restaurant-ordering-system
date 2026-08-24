@@ -1,5 +1,6 @@
 package com.restaurant.service;
 
+import java.util.UUID;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +26,7 @@ public class MenuItemService {
         return menuItemRepository.save(menuItem);
     }
     
-    public MenuItem updateMenuItem(Long id, MenuItem updatedItem) {
+    public MenuItem updateMenuItem(UUID id, MenuItem updatedItem) {
 
         MenuItem existingItem = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menu item not found"));
@@ -40,7 +41,7 @@ public class MenuItemService {
         return menuItemRepository.save(existingItem);
     }
     
-    public MenuItem toggleAvailability(Long id) {
+    public MenuItem toggleAvailability(UUID id) {
 
         MenuItem item = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menu item not found"));
@@ -58,7 +59,7 @@ public class MenuItemService {
 
     }
     
-    public MenuItem getMenuItemById(Long id) {
+    public MenuItem getMenuItemById(UUID id) {
 
         return menuItemRepository.findById(id)
                 .orElseThrow(() ->
@@ -84,7 +85,7 @@ return menuItemRepository.findAll(pageable);
         return menuItemRepository.findByNameContainingIgnoreCase(name);
     }
     
-    public List<MenuItem> getByCategory(Long categoryId) {
+    public List<MenuItem> getByCategory(UUID categoryId) {
 
         return menuItemRepository.findByCategoryId(categoryId);
 

@@ -1,6 +1,9 @@
 package com.restaurant.entity;
 
+import java.util.UUID;
+
 import com.restaurant.enums.Role;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,8 +13,8 @@ import jakarta.validation.constraints.NotBlank;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotBlank(message = "Full name is required")
     private String fullName;
@@ -32,7 +35,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String fullName, String email, String password,
+    public User(UUID id, String fullName, String email, String password,
                 String phone, Role role) {
         this.id = id;
         this.fullName = fullName;
@@ -42,11 +45,11 @@ public class User {
         this.role = role;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -81,7 +84,6 @@ public class User {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-    
 
     public Role getRole() {
         return role;

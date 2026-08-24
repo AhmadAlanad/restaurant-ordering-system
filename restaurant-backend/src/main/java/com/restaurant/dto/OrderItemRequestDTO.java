@@ -2,13 +2,14 @@ package com.restaurant.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class OrderItemRequestDTO {
 
     @NotNull(message = "Menu item ID is required")
-    private Long menuItemId;
+    private UUID menuItemId;
 
-    private Long optionId;
+    private UUID optionId;
 
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
@@ -17,19 +18,19 @@ public class OrderItemRequestDTO {
     public OrderItemRequestDTO() {
     }
 
-    public Long getMenuItemId() {
+    public UUID getMenuItemId() {
         return menuItemId;
     }
 
-    public void setMenuItemId(Long menuItemId) {
+    public void setMenuItemId(UUID menuItemId) {
         this.menuItemId = menuItemId;
     }
 
-    public Long getOptionId() {
+    public UUID getOptionId() {
         return optionId;
     }
 
-    public void setOptionId(Long optionId) {
+    public void setOptionId(UUID optionId) {
         this.optionId = optionId;
     }
 

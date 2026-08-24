@@ -111,7 +111,7 @@ function Orders() {
                                 <div>
 
                                     <h4>
-                                        Order #{order.id}
+                                        Order #{order.id.substring(0, 8)}
                                     </h4>
 
                                     <p className="text-muted order-date">

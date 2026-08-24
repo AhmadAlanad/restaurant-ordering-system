@@ -1,12 +1,14 @@
 package com.restaurant.dto;
 
+import java.util.UUID;
+
 public class OrderItemResponseDTO {
 
-    private Long menuItemId;
+    private UUID menuItemId;
 
     private String itemName;
 
-    private Long optionId;
+    private UUID optionId;
 
     private String optionName;
 
@@ -17,11 +19,11 @@ public class OrderItemResponseDTO {
     public OrderItemResponseDTO() {
     }
 
-    public Long getMenuItemId() {
+    public UUID getMenuItemId() {
         return menuItemId;
     }
 
-    public void setMenuItemId(Long menuItemId) {
+    public void setMenuItemId(UUID menuItemId) {
         this.menuItemId = menuItemId;
     }
 
@@ -33,11 +35,11 @@ public class OrderItemResponseDTO {
         this.itemName = itemName;
     }
 
-    public Long getOptionId() {
+    public UUID getOptionId() {
         return optionId;
     }
 
-    public void setOptionId(Long optionId) {
+    public void setOptionId(UUID optionId) {
         this.optionId = optionId;
     }
 
