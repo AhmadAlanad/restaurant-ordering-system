@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 
 import { CartContext } from "../context/CartContext";
 import api from "../services/api";
@@ -22,11 +22,29 @@ function Cart() {
 
     const [customerNote, setCustomerNote] = useState("");
     const [paymentMethod, setPaymentMethod] = useState("");
+	const [restaurantOpen, setRestaurantOpen] = useState(true);
 
     const {
         selectedAddress,
         setSelectedAddress
     } = useContext(AddressContext);
+	
+	
+	useEffect(() => {
+	    const fetchRestaurantStatus = async () => {
+	        try {
+	            const response = await api.get("/restaurant/status");
+	            setRestaurantOpen(response.data.open);
+	        } catch (error) {
+	            console.error(
+	                "Failed to load restaurant status:",
+	                error
+	            );
+	        }
+	    };
+
+	    fetchRestaurantStatus();
+	}, []);
 
 
     // Calculate cart total
@@ -42,9 +60,16 @@ function Cart() {
 
     // Place order
 
-    const placeOrder = async () => {
+	const placeOrder = async () => {
 
-        if (!selectedAddress) {
+	    if (!restaurantOpen) {
+	        alert(
+	            "The restaurant is currently closed. Please try again later."
+	        );
+	        return;
+	    }
+
+	    if (!selectedAddress) {
 
             alert(
                 "Please select a delivery address from the Home page."
@@ -430,16 +455,24 @@ function Cart() {
 
                     {/* PLACE ORDER */}
 
-                    <div className="cart-place-order">
+					<div className="cart-place-order">
 
-                        <button
-                            className="btn btn-primary btn-lg"
-                            onClick={placeOrder}
-                        >
-                            Place Order
-                        </button>
+					    {!restaurantOpen ? (
+					        <div className="alert alert-danger text-center">
+					            <strong>🔴 Restaurant is currently closed</strong>
+					            <br />
+					            You can still view your cart, but you cannot place an order right now.
+					        </div>
+					    ) : (
+					        <button
+					            className="btn btn-primary btn-lg"
+					            onClick={placeOrder}
+					        >
+					            Place Order
+					        </button>
+					    )}
 
-                    </div>
+					</div>
 
                 </>
 

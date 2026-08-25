@@ -17,6 +17,7 @@ function Home() {
     const [addressDescription, setAddressDescription] = useState("");
     const [locationLoading, setLocationLoading] = useState(false);
     const [locationError, setLocationError] = useState("");
+	const [restaurantOpen, setRestaurantOpen] = useState(true);
 
     const { selectedAddress, setSelectedAddress } =
         useContext(AddressContext);
@@ -31,6 +32,22 @@ function Home() {
         }
 
     }, [user]);
+	
+	useEffect(() => {
+	    const loadRestaurantStatus = async () => {
+	        try {
+	            const response = await api.get("/restaurant/status");
+	            setRestaurantOpen(response.data.open);
+	        } catch (error) {
+	            console.error(
+	                "Failed to load restaurant status:",
+	                error
+	            );
+	        }
+	    };
+
+	    loadRestaurantStatus();
+	}, []);
 
 
     const loadAddresses = async () => {
@@ -214,6 +231,28 @@ function Home() {
         }
 
     };
+	
+	const openRestaurant = async () => {
+	    try {
+	        await api.put("/restaurant/open");
+	        setRestaurantOpen(true);
+	        alert("Restaurant is now open.");
+	    } catch (error) {
+	        console.error(error);
+	        alert("Failed to open the restaurant.");
+	    }
+	};
+
+	const closeRestaurant = async () => {
+	    try {
+	        await api.put("/restaurant/close");
+	        setRestaurantOpen(false);
+	        alert("Restaurant is now closed.");
+	    } catch (error) {
+	        console.error(error);
+	        alert("Failed to close the restaurant.");
+	    }
+	};
 
 
     return (
@@ -233,6 +272,22 @@ function Home() {
                 </p>
 
             </div>
+			
+			<div className="mt-4 text-center">
+			    {restaurantOpen ? (
+			        <div className="alert alert-success">
+			            🟢 <strong>Restaurant is Open</strong>
+			            <br />
+			            You can browse the menu and place your order.
+			        </div>
+			    ) : (
+			        <div className="alert alert-danger">
+			            🔴 <strong>Restaurant is Closed</strong>
+			            <br />
+			            You can browse the menu, but ordering is currently unavailable.
+			        </div>
+			    )}
+			</div>
 
 
             {/* CUSTOMER HOME */}
@@ -592,6 +647,52 @@ function Home() {
                         </div>
 
                     </div>
+					
+					{/* RESTAURANT STATUS */}
+
+					<div className="col-md-4 mb-4">
+
+					    <div className="card shadow home-admin-card">
+
+					        <div className="card-body">
+
+					            <h3>
+					                🍽 Restaurant Status
+					            </h3>
+
+					            {restaurantOpen ? (
+					                <>
+					                    <p className="text-success">
+					                        🟢 Restaurant is currently <strong>OPEN</strong>.
+					                    </p>
+
+					                    <button
+					                        className="btn btn-danger"
+					                        onClick={closeRestaurant}
+					                    >
+					                        🔴 Close Restaurant
+					                    </button>
+					                </>
+					            ) : (
+					                <>
+					                    <p className="text-danger">
+					                        🔴 Restaurant is currently <strong>CLOSED</strong>.
+					                    </p>
+
+					                    <button
+					                        className="btn btn-success"
+					                        onClick={openRestaurant}
+					                    >
+					                        🟢 Open Restaurant
+					                    </button>
+					                </>
+					            )}
+
+					        </div>
+
+					    </div>
+
+					</div>
 
                 </div>
 

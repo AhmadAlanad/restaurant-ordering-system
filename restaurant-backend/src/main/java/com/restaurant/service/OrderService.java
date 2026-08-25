@@ -26,6 +26,7 @@ import com.restaurant.repository.UserRepository;
 import com.restaurant.entity.Notification;
 import com.restaurant.enums.Role;
 import com.restaurant.repository.NotificationRepository;
+import com.restaurant.exception.RestaurantClosedException;
 
 @Service
 public class OrderService {
@@ -44,12 +45,20 @@ public class OrderService {
     
     @Autowired
     private NotificationRepository notificationRepository;
+    
+    @Autowired
+    private RestaurantSettingsService restaurantSettingsService;
 
 
     public Order placeOrder(OrderRequestDTO request) {
 
-    	User user = getAuthenticatedUser();
+        User user = getAuthenticatedUser();
 
+        if (!restaurantSettingsService.isOpen()) {
+            throw new RestaurantClosedException(
+                    "Restaurant is currently closed"
+            );
+        }
 
         Order order = new Order();
 
@@ -217,7 +226,7 @@ public class OrderService {
                     "Only administrators can view all orders");
         }
 
-        return orderRepository.findAllByOrderByIdDesc();
+        return orderRepository.findAllByOrderByOrderDateDesc();
     }
 
 
@@ -232,7 +241,7 @@ public class OrderService {
                     "You cannot access another user's orders");
         }
 
-        return orderRepository.findByUserId(userId);
+        return orderRepository.findByUserIdOrderByOrderDateDesc(userId);
     }
 
 
