@@ -71,6 +71,7 @@ setOptionPrice("");
 
 };
 
+
 const deleteOption = async (menuItemId, optionId) => {
 
     try {
@@ -79,52 +80,111 @@ const deleteOption = async (menuItemId, optionId) => {
             `/menu-items/${menuItemId}/options/${optionId}`
         );
 
-        alert("Option deleted successfully!");
+        // Mark the option as deleted immediately
+        setEditingItem(prev => ({
+            ...prev,
+            options: prev.options.map(option =>
+                option.id === optionId
+                    ? { ...option, available: false }
+                    : option
+            )
+        }));
 
+        // Refresh menu items
         await loadMenuItems();
+
+        alert("Option deleted successfully!");
 
     } catch (error) {
 
-        console.error(error);
+        console.error("Delete option error:", error);
 
-        alert("Failed to delete option.");
-
+        if (error.response) {
+            alert(JSON.stringify(error.response.data));
+        } else {
+            alert(error.message);
+        }
     }
-
 };
+
+
+
+
+
+const restoreOption = async (menuItemId, optionId) => {
+
+    try {
+
+        const response = await api.put(
+            `/menu-items/${menuItemId}/options/${optionId}/restore`
+        );
+
+        // Restore the option immediately in the modal
+        setEditingItem(prev => ({
+            ...prev,
+            options: prev.options.map(option =>
+                option.id === optionId
+                    ? response.data
+                    : option
+            )
+        }));
+
+        // Refresh menu items
+        await loadMenuItems();
+
+        alert("Option restored successfully!");
+
+    } catch (error) {
+
+        console.error("Restore option error:", error);
+
+        alert("Failed to restore option.");
+    }
+};
+
+
+
 
 const updateOption = async () => {
 
     try {
 
-        await api.put(
-
+        const response = await api.put(
             `/menu-items/${editingItem.id}/options/${editingOption.id}`,
-
             {
                 name: optionName,
                 price: optionPrice
             }
-
         );
 
-        alert("Option updated successfully!");
+        // Update the option immediately in the modal
+        setEditingItem(prev => ({
+            ...prev,
+            options: prev.options.map(option =>
+                option.id === editingOption.id
+                    ? response.data
+                    : option
+            )
+        }));
 
+        // Refresh menu items
         await loadMenuItems();
 
         setEditingOption(null);
         setOptionName("");
         setOptionPrice("");
 
+        alert("Option updated successfully!");
+
     } catch (error) {
 
-        console.error(error);
+        console.error("Update option error:", error);
 
         alert("Failed to update option.");
-
     }
-
 };
+
+
 
 	const loadCategories = async () => {
 
@@ -160,7 +220,8 @@ const updateOption = async () => {
 
 };
 
-	const handleEdit = (item) => {
+
+const handleEdit = async (item) => {
 
     setEditingItem(item);
 
@@ -175,7 +236,10 @@ const updateOption = async () => {
 
     setShowItemModal(true);
 
+    await loadAllOptions(item.id);
 };
+
+
 
 	const handleChange = (e) => {
 
@@ -274,6 +338,24 @@ const saveCategory = async () => {
 }
 
 };
+
+
+const loadAllOptions = async (menuItemId) => {
+    try {
+        const response = await api.get(
+            `/menu-items/${menuItemId}/options/all`
+        );
+
+        setEditingItem(prev => ({
+            ...prev,
+            options: response.data
+        }));
+    } catch (error) {
+        console.error("Failed to load options:", error);
+    }
+};
+
+
 
     const loadMenuItems = async () => {
 
@@ -625,47 +707,82 @@ const saveCategory = async () => {
 
 <h5>Options</h5>
 
+
 {editingItem?.options?.map(option => (
 
-	<div
-	    key={option.id}
-	    className="admin-option-row"
-	>
+    <div
+        key={option.id}
+        className="admin-option-row"
+    >
 
-        <span>
+        <span
+            className={
+                option.available
+                    ? ""
+                    : "text-muted text-decoration-line-through"
+            }
+        >
             {option.name} - {option.price} SR
+
+            {!option.available && (
+                <span className="badge bg-danger ms-2">
+                    Deleted
+                </span>
+            )}
         </span>
 
-		<div className="admin-option-actions">
-		    <button
-		        className="btn btn-warning btn-sm"
-                onClick={() => {
+        <div className="admin-option-actions">
 
-                    setEditingOption(option);
+            {option.available ? (
 
-                    setOptionName(option.name);
+                <>
+                    <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => {
+                            setEditingOption(option);
+                            setOptionName(option.name);
+                            setOptionPrice(option.price);
+                        }}
+                    >
+                        Edit
+                    </button>
 
-                    setOptionPrice(option.price);
+                    <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() =>
+                            deleteOption(
+                                editingItem.id,
+                                option.id
+                            )
+                        }
+                    >
+                        Delete
+                    </button>
+                </>
 
-                }}
-            >
-                Edit
-            </button>
+            ) : (
 
-            <button
-                className="btn btn-danger btn-sm"
-                onClick={() =>
-                    deleteOption(editingItem.id, option.id)
-                }
-            >
-                Delete
-            </button>
+                <button
+                    className="btn btn-success btn-sm"
+                    onClick={() =>
+                        restoreOption(
+                            editingItem.id,
+                            option.id
+                        )
+                    }
+                >
+                    Restore
+                </button>
+
+            )}
 
         </div>
 
     </div>
 
 ))}
+
+
 
 <div className="row admin-option-form">
 

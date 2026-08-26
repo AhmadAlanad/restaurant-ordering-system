@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.UUID;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 public class MenuItem {
@@ -30,13 +31,17 @@ public class MenuItem {
     @JoinColumn(name = "category_id")
     private Category category;
     
+    
     @OneToMany(
             mappedBy = "menuItem",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("createdAt ASC")
+    @SQLRestriction("available = true")
     @JsonManagedReference
     private List<MenuItemOption> options;
+    
 
     public MenuItem() {
     }

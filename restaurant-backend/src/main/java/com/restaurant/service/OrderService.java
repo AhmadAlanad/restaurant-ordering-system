@@ -106,6 +106,13 @@ public class OrderService {
                                     "Menu item not found"
                             )
                     );
+            
+            if (!menuItem.isAvailable()) {
+                throw new IllegalArgumentException(
+                        "Menu item '" + menuItem.getName()
+                        + "' is no longer available"
+                );
+            }
 
 
             MenuItemOption option = null;
@@ -113,26 +120,37 @@ public class OrderService {
 
             if (itemRequest.getOptionId() != null) {
 
-                option = optionRepository.findById(
-                        itemRequest.getOptionId()
-                ).orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Option not found"
-                        )
-                );
+            	
+            	option = optionRepository.findById(
+            	        itemRequest.getOptionId()
+            	)
+            	.orElseThrow(() ->
+            	        new ResourceNotFoundException(
+            	                "Option not found"
+            	        )
+            	);
 
-                // Make sure the selected option
-                // belongs to the selected menu item.
-                if (!option.getMenuItem().getId()
-                        .equals(menuItem.getId())) {
+            	// Make sure the selected option is still available.
+            	if (!option.isAvailable()) {
+            	    throw new IllegalArgumentException(
+            	            "Selected option '" + option.getName()
+            	            + "' is no longer available"
+            	    );
+            	}
 
-                    throw new IllegalArgumentException(
-                            "Selected option does not belong to this menu item"
-                    );
-                }
+            	// Make sure the selected option
+            	// belongs to the selected menu item.
+            	if (!option.getMenuItem().getId()
+            	        .equals(menuItem.getId())) {
 
-                // Use option price
-                itemPrice = option.getPrice();
+            	    throw new IllegalArgumentException(
+            	            "Selected option does not belong to this menu item"
+            	    );
+            	}
+
+            	// Use option price
+            	itemPrice = option.getPrice();
+            	
 
             } else {
 

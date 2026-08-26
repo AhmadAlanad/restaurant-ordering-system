@@ -22,10 +22,16 @@ public class MenuItemOptionService {
     private MenuItemRepository menuItemRepository;
 
     public List<MenuItemOption> getOptions(UUID menuItemId) {
-
-        return optionRepository.findByMenuItemId(menuItemId);
-
+        return optionRepository.findByMenuItemIdAndAvailableTrue(menuItemId);
     }
+    
+    
+    public List<MenuItemOption> getAllOptions(UUID menuItemId) {
+
+        return optionRepository.findByMenuItemIdOrderByCreatedAtAsc(menuItemId);
+    }
+    
+
 
     public MenuItemOption addOption(
             UUID menuItemId,
@@ -43,8 +49,13 @@ public class MenuItemOptionService {
 
     public void deleteOption(UUID id) {
 
-        optionRepository.deleteById(id);
+        MenuItemOption option = optionRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Option not found"));
 
+        option.setAvailable(false);
+
+        optionRepository.save(option);
     }
 
     public MenuItemOption updateOption(
@@ -60,4 +71,18 @@ public class MenuItemOptionService {
 
         return optionRepository.save(option);
     }
+    
+    
+    public MenuItemOption restoreOption(UUID id) {
+
+        MenuItemOption option = optionRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Option not found"));
+
+        option.setAvailable(true);
+
+        return optionRepository.save(option);
+    }
+    
+
 }

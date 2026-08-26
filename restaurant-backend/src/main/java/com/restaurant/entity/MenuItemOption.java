@@ -4,6 +4,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 public class MenuItemOption {
@@ -12,9 +15,15 @@ public class MenuItemOption {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotBlank(message = "Option name is required") 
     private String name;
-
+    
+    private boolean available = true;
+    
+    @Positive(message = "Option price must be greater than zero") 
     private double price;
+    
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "menu_item_id")
@@ -22,6 +31,11 @@ public class MenuItemOption {
     private MenuItem menuItem;
 
     public MenuItemOption() {
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
     public UUID getId() {
@@ -39,6 +53,14 @@ public class MenuItemOption {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     public double getPrice() {
         return price;
@@ -54,5 +76,13 @@ public class MenuItemOption {
 
     public void setMenuItem(MenuItem menuItem) {
         this.menuItem = menuItem;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

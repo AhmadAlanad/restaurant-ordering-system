@@ -35,6 +35,12 @@ public class OrderMapper {
             OrderItemResponseDTO itemDTO = new OrderItemResponseDTO();
 
             itemDTO.setItemName(orderItem.getMenuItem().getName());
+
+            if (orderItem.getOption() != null) {
+                itemDTO.setOptionId(orderItem.getOption().getId());
+                itemDTO.setOptionName(orderItem.getOption().getName());
+            }
+
             itemDTO.setPrice(orderItem.getPrice());
             itemDTO.setQuantity(orderItem.getQuantity());
 

@@ -212,13 +212,14 @@ function Orders() {
                                             className="list-group-item d-flex justify-content-between"
                                         >
 
-                                            <span>
-
-                                                {item.itemName}
-                                                {" × "}
-                                                {item.quantity}
-
-                                            </span>
+										<span>
+										    {item.itemName}
+										    {item.optionName && (
+										        <> — {item.optionName}</>
+										    )}
+										    {" × "}
+										    {item.quantity}
+										</span>
 
                                             <strong>
 
