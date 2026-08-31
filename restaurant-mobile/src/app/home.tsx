@@ -187,36 +187,51 @@ export default function HomeScreen() {
           !
         </Text>
 
-        <View style={styles.headerButtons}>
-          <Pressable
-            style={styles.headerButton}
-            onPress={() =>
-              router.push('/addresses')
-            }
-          >
-            <Text style={styles.headerButtonText}>
-              Addresses
-            </Text>
-          </Pressable>
+        
+<View style={styles.headerButtons}>
+  <Pressable
+    style={styles.headerButton}
+    onPress={() =>
+      router.push('/addresses')
+    }
+  >
+    <Text style={styles.headerButtonText}>
+      Addresses
+    </Text>
+  </Pressable>
 
-          <Pressable
-            style={styles.headerButton}
-            onPress={() => router.push('/profile')}
-          >
-            <Text style={styles.headerButtonText}>
-              Profile
-            </Text>
-          </Pressable>
+  <Pressable
+    style={styles.headerButton}
+    onPress={() =>
+      router.push('/orders')
+    }
+  >
+    <Text style={styles.headerButtonText}>
+      My Orders
+    </Text>
+  </Pressable>
 
-          <Pressable
-            style={styles.logoutButton}
-            onPress={handleLogout}
-          >
-            <Text style={styles.headerButtonText}>
-              Logout
-            </Text>
-          </Pressable>
-        </View>
+  <Pressable
+    style={styles.headerButton}
+    onPress={() =>
+      router.push('/profile')
+    }
+  >
+    <Text style={styles.headerButtonText}>
+      Profile
+    </Text>
+  </Pressable>
+
+  <Pressable
+    style={styles.logoutButton}
+    onPress={handleLogout}
+  >
+    <Text style={styles.headerButtonText}>
+      Logout
+    </Text>
+  </Pressable>
+</View>
+
       </View>
 
       <Text style={styles.menuTitle}>

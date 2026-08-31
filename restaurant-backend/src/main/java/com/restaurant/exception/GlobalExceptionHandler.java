@@ -78,17 +78,34 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
-    
- // 409 - Restaurant is closed
+
+
+    // 409 - Restaurant is closed
     @ExceptionHandler(RestaurantClosedException.class)
     public ResponseEntity<Map<String, String>> handleRestaurantClosed(
             RestaurantClosedException ex) {
 
         Map<String, String> error = new HashMap<>();
+
         error.put("error", ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+
+    // 400 - Runtime errors
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(
+            RuntimeException ex) {
+
+        Map<String, String> error = new HashMap<>();
+
+        error.put("error", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(error);
     }
 
@@ -107,3 +124,4 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 }
+
