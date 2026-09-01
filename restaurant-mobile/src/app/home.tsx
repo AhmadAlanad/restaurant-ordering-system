@@ -7,12 +7,20 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   Pressable,
   Text,
   View
 } from 'react-native';
 
 import { styles } from '@/styles/home.styles';
+
+type MenuItemOption = {
+  id: string;
+  name: string;
+  price: number;
+  available: boolean;
+};
 
 type MenuItem = {
   id: string;
@@ -25,6 +33,7 @@ type MenuItem = {
     id: string;
     name: string;
   };
+  options?: MenuItemOption[];
 };
 
 export default function HomeScreen() {
@@ -32,14 +41,24 @@ export default function HomeScreen() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedItem, setSelectedItem] =
+    useState<MenuItem | null>(null);
+
+  const [selectedOption, setSelectedOption] =
+    useState<MenuItemOption | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] =
     useState<string | null>(null);
   const [cart, setCart] = useState<any[]>([]);
+  const [cartMessage, setCartMessage] = useState('');
 
   useEffect(() => {
-  checkAuthentication();
+    checkAuthentication();
   }, []);
+  const cartItemCount = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const checkAuthentication = async () => {
     const token = await getToken();
@@ -49,8 +68,8 @@ export default function HomeScreen() {
       return;
     }
 
-  loadHome();
-};
+    loadHome();
+  };
 
   const loadHome = async () => {
     try {
@@ -76,43 +95,49 @@ export default function HomeScreen() {
   };
 
   const handleLogout = async () => {
-  console.log('LOGOUT BUTTON PRESSED');
+    console.log('LOGOUT BUTTON PRESSED');
 
-  try {
-    await logout();
+    try {
+      await logout();
 
-    console.log('LOGOUT SUCCESS');
+      console.log('LOGOUT SUCCESS');
 
-    setUser(null);
-    setCart([]);
+      setUser(null);
+      setCart([]);
 
-    router.replace('/');
-  } catch (error) {
-    console.log('Logout error:', error);
-  }
-};
+      router.replace('/');
+    } catch (error) {
+      console.log('Logout error:', error);
+    }
+  };
 
   const filteredMenuItems =
     selectedCategory === null
       ? menuItems
       : menuItems.filter(
-          (item) => item.category?.id === selectedCategory
-        );
+        (item) => item.category?.id === selectedCategory
+      );
 
-  const addToCart = async (item: MenuItem) => {
+  const addToCart = async (
+    item: MenuItem,
+    option?: MenuItemOption
+  ) => {
     const existingItem = cart.find(
-      (cartItem) => cartItem.id === item.id
+      (cartItem) =>
+        cartItem.id === item.id &&
+        cartItem.optionId === (option?.id ?? null)
     );
 
     let updatedCart;
 
     if (existingItem) {
       updatedCart = cart.map((cartItem) =>
-        cartItem.id === item.id
+        cartItem.id === item.id &&
+          cartItem.optionId === (option?.id ?? null)
           ? {
-              ...cartItem,
-              quantity: cartItem.quantity + 1,
-            }
+            ...cartItem,
+            quantity: cartItem.quantity + 1,
+          }
           : cartItem
       );
     } else {
@@ -120,6 +145,9 @@ export default function HomeScreen() {
         ...cart,
         {
           ...item,
+          optionId: option?.id ?? null,
+          optionName: option?.name ?? null,
+          optionPrice: option?.price ?? 0,
           quantity: 1,
         },
       ];
@@ -128,7 +156,15 @@ export default function HomeScreen() {
     setCart(updatedCart);
     await saveCart(updatedCart);
 
-    alert(`${item.name} added to cart.`);
+    const message = option
+      ? `✓ ${item.name} (${option.name}) added to cart.`
+      : `✓ ${item.name} added to cart.`;
+
+    setCartMessage(message);
+
+    setTimeout(() => {
+      setCartMessage('');
+    }, 2000);
   };
 
   const renderMenuItem = ({
@@ -162,7 +198,14 @@ export default function HomeScreen() {
 
         <Pressable
           style={styles.addButton}
-          onPress={() => addToCart(item)}
+          onPress={() => {
+            if (item.options && item.options.length > 0) {
+              setSelectedItem(item);
+              setSelectedOption(null);
+            } else {
+              addToCart(item);
+            }
+          }}
         >
           <Text style={styles.addButtonText}>
             Add
@@ -187,72 +230,82 @@ export default function HomeScreen() {
           !
         </Text>
 
-        
-<View style={styles.headerButtons}>
-  <Pressable
-    style={styles.headerButton}
-    onPress={() =>
-      router.push('/addresses')
-    }
-  >
-    <Text style={styles.headerButtonText}>
-      Addresses
-    </Text>
-  </Pressable>
 
-  <Pressable
-    style={styles.headerButton}
-    onPress={() =>
-      router.push('/orders')
-    }
-  >
-    <Text style={styles.headerButtonText}>
-      My Orders
-    </Text>
-  </Pressable>
+        <View style={styles.headerButtons}>
+          <Pressable
+            style={styles.headerButton}
+            onPress={() =>
+              router.push('/addresses')
+            }
+          >
+            <Text style={styles.headerButtonText}>
+              Addresses
+            </Text>
+          </Pressable>
 
-  <Pressable
-    style={styles.headerButton}
-    onPress={() =>
-      router.push('/profile')
-    }
-  >
-    <Text style={styles.headerButtonText}>
-      Profile
-    </Text>
-  </Pressable>
+          <Pressable
+            style={styles.headerButton}
+            onPress={() =>
+              router.push('/orders')
+            }
+          >
+            <Text style={styles.headerButtonText}>
+              My Orders
+            </Text>
+          </Pressable>
 
-  <Pressable
-    style={styles.logoutButton}
-    onPress={handleLogout}
-  >
-    <Text style={styles.headerButtonText}>
-      Logout
-    </Text>
-  </Pressable>
-</View>
+          <Pressable
+            style={styles.headerButton}
+            onPress={() =>
+              router.push('/profile')
+            }
+          >
+            <Text style={styles.headerButtonText}>
+              Profile
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.headerButtonText}>
+              Logout
+            </Text>
+          </Pressable>
+        </View>
 
       </View>
 
-      <Text style={styles.menuTitle}>
-        Menu
-      </Text>
-
-      <Pressable
-        style={styles.headerButton}
-        onPress={() => router.push('/cart')}
-      >
-        <Text style={styles.headerButtonText}>
-          Cart ({cart.length})
+      <View style={styles.menuHeader}>
+        <Text style={styles.menuTitle}>
+          Menu
         </Text>
-      </Pressable>
+
+        <Pressable
+          style={styles.cartButton}
+          onPress={() => router.push('/cart')}
+        >
+          <Text style={styles.cartButtonText}>
+            Cart ({cartItemCount})
+          </Text>
+        </Pressable>
+      </View>
+
+      {cartMessage ? (
+        <View style={styles.cartMessage}>
+          <Text style={styles.cartMessageText}>
+            {cartMessage}
+          </Text>
+        </View>
+      ) : null}
 
       <View style={styles.categoryContainer}>
         <Pressable
           style={[
             styles.categoryButton,
             selectedCategory === null &&
-              styles.categoryButtonActive,
+            styles.categoryButtonActive,
           ]}
           onPress={() => setSelectedCategory(null)}
         >
@@ -260,7 +313,7 @@ export default function HomeScreen() {
             style={[
               styles.categoryText,
               selectedCategory === null &&
-                styles.categoryTextActive,
+              styles.categoryTextActive,
             ]}
           >
             All
@@ -273,7 +326,7 @@ export default function HomeScreen() {
             style={[
               styles.categoryButton,
               selectedCategory === category.id &&
-                styles.categoryButtonActive,
+              styles.categoryButtonActive,
             ]}
             onPress={() =>
               setSelectedCategory(category.id)
@@ -283,7 +336,7 @@ export default function HomeScreen() {
               style={[
                 styles.categoryText,
                 selectedCategory === category.id &&
-                  styles.categoryTextActive,
+                styles.categoryTextActive,
               ]}
             >
               {category.name}
@@ -310,6 +363,111 @@ export default function HomeScreen() {
           contentContainerStyle={styles.list}
         />
       )}
+
+      <Modal
+        visible={selectedItem !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setSelectedItem(null);
+          setSelectedOption(null);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.optionModal}>
+            <Text style={styles.modalTitle}>
+              {selectedItem?.name}
+            </Text>
+
+            <Text style={styles.modalSubtitle}>
+              Choose an option
+            </Text>
+
+            {selectedItem?.options?.map((option) => {
+              const selected =
+                selectedOption?.id === option.id;
+
+              return (
+                <Pressable
+                  key={option.id}
+                  style={[
+                    styles.optionButton,
+                    selected &&
+                    styles.optionButtonSelected,
+                  ]}
+                  onPress={() =>
+                    setSelectedOption(option)
+                  }
+                >
+                  <View style={styles.optionInfo}>
+                    <Text
+                      style={[
+                        styles.optionName,
+                        selected &&
+                        styles.optionNameSelected,
+                      ]}
+                    >
+                      {option.name}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.optionPrice,
+                        selected &&
+                        styles.optionPriceSelected,
+                      ]}
+                    >
+                      {option.price.toFixed(2)}
+                    </Text>
+                  </View>
+
+                  <Text style={styles.radio}>
+                    {selected ? '●' : '○'}
+                  </Text>
+                </Pressable>
+              );
+            })}
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => {
+                  setSelectedItem(null);
+                  setSelectedOption(null);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>
+                  Cancel
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.confirmButton,
+                  !selectedOption &&
+                  styles.confirmButtonDisabled,
+                ]}
+                disabled={!selectedOption}
+                onPress={() => {
+                  if (selectedItem && selectedOption) {
+                    addToCart(
+                      selectedItem,
+                      selectedOption
+                    );
+
+                    setSelectedItem(null);
+                    setSelectedOption(null);
+                  }
+                }}
+              >
+                <Text style={styles.confirmButtonText}>
+                  Add to Cart
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

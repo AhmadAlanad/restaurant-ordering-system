@@ -146,38 +146,38 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
- 
-successMessage: {
-  marginTop: 12,
-  padding: 10,
-  borderRadius: 8,
-  backgroundColor: '#d1e7dd',
-  color: '#0f5132',
-  fontSize: 14,
-  fontWeight: '600',
-  textAlign: 'center',
-},
 
-warningMessage: {
-  marginTop: 12,
-  padding: 10,
-  borderRadius: 8,
-  backgroundColor: '#fff3cd',
-  color: '#856404',
-  fontSize: 14,
-  fontWeight: '600',
-  textAlign: 'center',
-},
+  successMessage: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#d1e7dd',
+    color: '#0f5132',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 
-errorMessage: {
-  marginTop: 12,
-  padding: 10,
-  borderRadius: 8,
-  backgroundColor: '#f8d7da',
-  color: '#842029',
-  fontSize: 14,
-  fontWeight: '600',
-  textAlign: 'center',
-},
+  warningMessage: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#fff3cd',
+    color: '#856404',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
+  errorMessage: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#f8d7da',
+    color: '#842029',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 
 });

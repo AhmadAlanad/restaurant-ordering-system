@@ -1,9 +1,20 @@
+import { getUser } from '@/services/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CART_KEY = 'cart';
+async function getCartKey() {
+  const user = await getUser();
+
+  if (!user?.id) {
+    throw new Error('User is not logged in.');
+  }
+
+  return `cart_${user.id}`;
+}
 
 export async function getCart() {
-  const cart = await AsyncStorage.getItem(CART_KEY);
+  const cartKey = await getCartKey();
+
+  const cart = await AsyncStorage.getItem(cartKey);
 
   if (!cart) {
     return [];
@@ -13,9 +24,16 @@ export async function getCart() {
 }
 
 export async function saveCart(cart: any[]) {
-  await AsyncStorage.setItem(CART_KEY, JSON.stringify(cart));
+  const cartKey = await getCartKey();
+
+  await AsyncStorage.setItem(
+    cartKey,
+    JSON.stringify(cart)
+  );
 }
 
 export async function clearCart() {
-  await AsyncStorage.removeItem(CART_KEY);
+  const cartKey = await getCartKey();
+
+  await AsyncStorage.removeItem(cartKey);
 }

@@ -115,31 +115,31 @@ export default function OrdersScreen() {
     }
   };
 
-  
-const getOrderHeaderStyle = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return styles.orderHeaderPending;
 
-    case 'ACCEPTED':
-      return styles.orderHeaderAccepted;
+  const getOrderHeaderStyle = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return styles.orderHeaderPending;
 
-    case 'PREPARING':
-      return styles.orderHeaderPreparing;
+      case 'ACCEPTED':
+        return styles.orderHeaderAccepted;
 
-    case 'READY':
-      return styles.orderHeaderReady;
+      case 'PREPARING':
+        return styles.orderHeaderPreparing;
 
-    case 'DELIVERED':
-      return styles.orderHeaderDelivered;
+      case 'READY':
+        return styles.orderHeaderReady;
 
-    case 'REJECTED':
-      return styles.orderHeaderRejected;
+      case 'DELIVERED':
+        return styles.orderHeaderDelivered;
 
-    default:
-      return styles.orderHeaderDefault;
-  }
-};
+      case 'REJECTED':
+        return styles.orderHeaderRejected;
+
+      default:
+        return styles.orderHeaderDefault;
+    }
+  };
 
 
   const formatDate = (date?: string) => {
@@ -253,7 +253,7 @@ const getOrderHeaderStyle = (status: string) => {
                 openOrderDetails(item.id)
               }
             >
-              
+
               <View
                 style={[
                   styles.orderHeader,

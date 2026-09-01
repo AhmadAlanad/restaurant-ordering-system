@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from 'react-native';
 
 import api from '@/services/api';
@@ -135,36 +135,36 @@ export default function OrderDetailsScreen() {
   };
 
   const statusSteps = [
-  'PENDING',
-  'ACCEPTED',
-  'PREPARING',
-  'READY',
-  'DELIVERED',
-];
+    'PENDING',
+    'ACCEPTED',
+    'PREPARING',
+    'READY',
+    'DELIVERED',
+  ];
 
-const getStatusStepIndex = (status: string) => {
-  return statusSteps.indexOf(status);
-};
+  const getStatusStepIndex = (status: string) => {
+    return statusSteps.indexOf(status);
+  };
 
-const formatOrderDate = (date?: string) => {
-  if (!date) {
-    return 'Date not available';
-  }
+  const formatOrderDate = (date?: string) => {
+    if (!date) {
+      return 'Date not available';
+    }
 
-  const parsedDate = new Date(date);
+    const parsedDate = new Date(date);
 
-  if (isNaN(parsedDate.getTime())) {
-    return 'Date not available';
-  }
+    if (isNaN(parsedDate.getTime())) {
+      return 'Date not available';
+    }
 
-  return parsedDate.toLocaleString([], {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+    return parsedDate.toLocaleString([], {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const formatDate = (date?: string) => {
     if (!date) {
@@ -241,7 +241,7 @@ const formatOrderDate = (date?: string) => {
             </Text>
 
             <Text style={styles.orderDate}>
-                {formatOrderDate(order.orderDate)}
+              {formatOrderDate(order.orderDate)}
             </Text>
 
             <Text
@@ -256,92 +256,92 @@ const formatOrderDate = (date?: string) => {
         </View>
 
         {/* Order Progress */}
-{order.status !== 'REJECTED' ? (
-  <View style={styles.card}>
-    <Text style={styles.sectionTitle}>
-      Order Progress
-    </Text>
-
-    <View style={styles.progressContainer}>
-      {statusSteps.map((step, index) => {
-        const currentIndex =
-          getStatusStepIndex(order.status);
-
-        const completed = index <= currentIndex;
-        const current = index === currentIndex;
-
-        return (
-          <View
-            key={step}
-            style={styles.progressStep}
-          >
-            <View
-              style={[
-                styles.progressCircle,
-                completed &&
-                  styles.progressCircleCompleted,
-                current &&
-                  styles.progressCircleCurrent,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.progressCircleText,
-                  completed &&
-                    styles.progressCircleTextCompleted,
-                ]}
-              >
-                {completed ? '✓' : ''}
-              </Text>
-            </View>
-
-            <Text
-              style={[
-                styles.progressLabel,
-                current &&
-                  styles.progressLabelCurrent,
-              ]}
-            >
-              {getStatusText(step)}
+        {order.status !== 'REJECTED' ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>
+              Order Progress
             </Text>
 
-            {index < statusSteps.length - 1 ? (
-              <View
-                style={[
-                  styles.progressLine,
-                  index < currentIndex &&
-                    styles.progressLineCompleted,
-                ]}
-              />
-            ) : null}
+            <View style={styles.progressContainer}>
+              {statusSteps.map((step, index) => {
+                const currentIndex =
+                  getStatusStepIndex(order.status);
+
+                const completed = index <= currentIndex;
+                const current = index === currentIndex;
+
+                return (
+                  <View
+                    key={step}
+                    style={styles.progressStep}
+                  >
+                    <View
+                      style={[
+                        styles.progressCircle,
+                        completed &&
+                        styles.progressCircleCompleted,
+                        current &&
+                        styles.progressCircleCurrent,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.progressCircleText,
+                          completed &&
+                          styles.progressCircleTextCompleted,
+                        ]}
+                      >
+                        {completed ? '✓' : ''}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        styles.progressLabel,
+                        current &&
+                        styles.progressLabelCurrent,
+                      ]}
+                    >
+                      {getStatusText(step)}
+                    </Text>
+
+                    {index < statusSteps.length - 1 ? (
+                      <View
+                        style={[
+                          styles.progressLine,
+                          index < currentIndex &&
+                          styles.progressLineCompleted,
+                        ]}
+                      />
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
           </View>
-        );
-      })}
-    </View>
-  </View>
-) : (
-  <View style={styles.card}>
-    <Text style={styles.sectionTitle}>
-      Order Status
-    </Text>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>
+              Order Status
+            </Text>
 
-    <Text style={styles.rejectedStatus}>
-      Order Rejected
-    </Text>
+            <Text style={styles.rejectedStatus}>
+              Order Rejected
+            </Text>
 
-    {order.rejectionReason ? (
-      <Text style={styles.rejectionReason}>
-        Reason: {order.rejectionReason}
-      </Text>
-    ) : (
-      <Text style={styles.rejectionReason}>
-        No rejection reason was provided.
-      </Text>
-    )}
-  </View>
-)}
+            {order.rejectionReason ? (
+              <Text style={styles.rejectionReason}>
+                Reason: {order.rejectionReason}
+              </Text>
+            ) : (
+              <Text style={styles.rejectionReason}>
+                No rejection reason was provided.
+              </Text>
+            )}
+          </View>
+        )}
 
-        
+
 
         {/* Items */}
         <View style={styles.card}>
@@ -369,7 +369,7 @@ const formatOrderDate = (date?: string) => {
                 ) : null}
 
                 <Text style={styles.itemPrice}>
-                  ${item.price.toFixed(2)} 
+                  ${item.price.toFixed(2)}
                 </Text>
               </View>
 
@@ -410,32 +410,32 @@ const formatOrderDate = (date?: string) => {
             {order.paymentMethod === 'CREDIT_CARD'
               ? 'Credit Card'
               : order.paymentMethod === 'CASH'
-              ? 'Cash'
-              : 'Not specified'}
+                ? 'Cash'
+                : 'Not specified'}
           </Text>
         </View>
 
         {/* Delivery address */}
         {(order.addressLabel ||
           order.addressDescription) && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Delivery Address
-            </Text>
-
-            {order.addressLabel ? (
-              <Text style={styles.addressLabel}>
-                {order.addressLabel}
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>
+                Delivery Address
               </Text>
-            ) : null}
 
-            {order.addressDescription ? (
-              <Text style={styles.addressDescription}>
-                {order.addressDescription}
-              </Text>
-            ) : null}
-          </View>
-        )}
+              {order.addressLabel ? (
+                <Text style={styles.addressLabel}>
+                  {order.addressLabel}
+                </Text>
+              ) : null}
+
+              {order.addressDescription ? (
+                <Text style={styles.addressDescription}>
+                  {order.addressDescription}
+                </Text>
+              ) : null}
+            </View>
+          )}
 
         {/* Customer note */}
         {order.customerNote ? (
@@ -450,7 +450,7 @@ const formatOrderDate = (date?: string) => {
           </View>
         ) : null}
 
-        
+
 
         {/* Back button */}
         <Pressable

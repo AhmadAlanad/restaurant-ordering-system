@@ -6,6 +6,7 @@ import {
   Alert,
   FlatList,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View
@@ -22,6 +23,9 @@ type CartItem = {
   name: string;
   price: number;
   quantity: number;
+  optionId?: string | null;
+  optionName?: string | null;
+  optionPrice?: number;
 };
 
 type Address = {
@@ -77,8 +81,20 @@ export default function CheckoutScreen() {
     }
   };
 
+  const getItemUnitPrice = (item: CartItem) => {
+    if (item.optionId) {
+      return item.optionPrice ?? item.price;
+    }
+
+    return item.price;
+  };
+
+  const getItemTotal = (item: CartItem) => {
+    return getItemUnitPrice(item) * item.quantity;
+  };
+
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + getItemTotal(item),
     0
   );
 
@@ -109,7 +125,7 @@ export default function CheckoutScreen() {
 
         items: cart.map((item) => ({
           menuItemId: item.id,
-          optionId: null,
+          optionId: item.optionId ?? null,
           quantity: item.quantity,
         })),
 
@@ -131,17 +147,17 @@ export default function CheckoutScreen() {
 
       const result = await placeOrder(order);
 
-        console.log('Order created:', result);
+      console.log('Order created:', result);
 
-        await clearCart();
-        setCart([]);
+      await clearCart();
+      setCart([]);
 
-        router.replace({
+      router.replace({
         pathname: '/order-success',
         params: {
-            orderId: result.id,
+          orderId: result.id,
         },
-        });
+      });
     } catch (error: any) {
       console.log(
         'Place order error:',
@@ -170,7 +186,11 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -219,7 +239,7 @@ export default function CheckoutScreen() {
                 style={[
                   styles.addressCard,
                   selected &&
-                    styles.addressCardSelected,
+                  styles.addressCardSelected,
                 ]}
                 onPress={() =>
                   setSelectedAddress(item)
@@ -253,7 +273,7 @@ export default function CheckoutScreen() {
           style={[
             styles.paymentButton,
             paymentMethod === 'CASH' &&
-              styles.paymentButtonSelected,
+            styles.paymentButtonSelected,
           ]}
           onPress={() =>
             setPaymentMethod('CASH')
@@ -263,7 +283,7 @@ export default function CheckoutScreen() {
             style={[
               styles.paymentText,
               paymentMethod === 'CASH' &&
-                styles.paymentTextSelected,
+              styles.paymentTextSelected,
             ]}
           >
             Cash
@@ -274,7 +294,7 @@ export default function CheckoutScreen() {
           style={[
             styles.paymentButton,
             paymentMethod === 'CREDIT_CARD' &&
-              styles.paymentButtonSelected,
+            styles.paymentButtonSelected,
           ]}
           onPress={() =>
             setPaymentMethod('CREDIT_CARD')
@@ -284,7 +304,7 @@ export default function CheckoutScreen() {
             style={[
               styles.paymentText,
               paymentMethod === 'CREDIT_CARD' &&
-                styles.paymentTextSelected,
+              styles.paymentTextSelected,
             ]}
           >
             Credit Card
@@ -292,18 +312,7 @@ export default function CheckoutScreen() {
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>
-  Customer Note
-</Text>
 
-<TextInput
-  style={styles.noteInput}
-  placeholder="Add a note for the restaurant (optional)"
-  placeholderTextColor="#999"
-  value={customerNote}
-  onChangeText={setCustomerNote}
-  multiline
-/>
 
       <Text style={styles.sectionTitle}>
         Order Summary
@@ -315,22 +324,34 @@ export default function CheckoutScreen() {
         style={styles.cartList}
         renderItem={({ item }) => (
           <View style={styles.cartItem}>
-            <View>
+            <View style={styles.itemInfo}>
               <Text style={styles.itemName}>
                 {item.name}
               </Text>
 
+              {item.optionName ? (
+                <Text style={styles.optionName}>
+                  Option: {item.optionName}
+                </Text>
+              ) : null}
+
               <Text style={styles.itemQuantity}>
                 Quantity: {item.quantity}
+              </Text>
+
+              <Text style={styles.itemUnitPrice}>
+                {getItemUnitPrice(item).toFixed(2)}
               </Text>
             </View>
 
             <Text style={styles.itemTotal}>
-              ${(item.price * item.quantity).toFixed(2)}
+              ${getItemTotal(item).toFixed(2)}
             </Text>
           </View>
         )}
       />
+
+
 
       <View style={styles.bottomContainer}>
         <View style={styles.totalRow}>
@@ -343,11 +364,24 @@ export default function CheckoutScreen() {
           </Text>
         </View>
 
+        <Text style={styles.sectionTitle}>
+          Customer Note
+        </Text>
+
+        <TextInput
+          style={styles.noteInput}
+          placeholder="Add a note for the restaurant (optional)"
+          placeholderTextColor="#999"
+          value={customerNote}
+          onChangeText={setCustomerNote}
+          multiline
+        />
+
         <Pressable
           style={[
             styles.placeOrderButton,
             placingOrder &&
-              styles.placeOrderButtonDisabled,
+            styles.placeOrderButtonDisabled,
           ]}
           onPress={handlePlaceOrder}
           disabled={placingOrder}
@@ -359,7 +393,7 @@ export default function CheckoutScreen() {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

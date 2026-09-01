@@ -23,15 +23,16 @@ export const styles = StyleSheet.create({
   },
 
   headerButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-    marginTop: 15,
-  },
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  gap: 10,
+  marginTop: 15,
+},
 
  headerButton: {
   backgroundColor: '#222222',
-  width: 100,
+  flex: 1,
+  minWidth: '45%',
   height: 42,
   borderRadius: 10,
   alignItems: 'center',
@@ -40,7 +41,8 @@ export const styles = StyleSheet.create({
 
 logoutButton: {
   backgroundColor: '#cc0000',
-  width: 100,
+  flex: 1,
+  minWidth: '45%',
   height: 42,
   borderRadius: 10,
   alignItems: 'center',
@@ -55,7 +57,6 @@ headerButtonText: {
   menuTitle: {
     fontSize: 24,
     fontWeight: '700',
-    marginBottom: 15,
   },
 
   list: {
@@ -155,5 +156,148 @@ headerButtonText: {
     color: '#ffffff',
   },
 
+  menuHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 15,
+},
+
+cartButton: {
+  backgroundColor: '#222222',
+  paddingHorizontal: 16,
+  height: 42,
+  borderRadius: 10,
+  justifyContent: 'center',
+},
+
+cartButtonText: {
+  color: '#ffffff',
+  fontWeight: '700',
+},
+
+cartMessage: {
+  backgroundColor: '#e8f5e9',
+  borderRadius: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  marginBottom: 15,
+},
+
+cartMessageText: {
+  color: '#2e7d32',
+  fontWeight: '600',
+},
+
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+
+optionModal: {
+  width: '100%',
+  maxWidth: 450,
+  backgroundColor: '#ffffff',
+  borderRadius: 16,
+  padding: 20,
+},
+
+modalTitle: {
+  fontSize: 22,
+  fontWeight: '700',
+  marginBottom: 5,
+},
+
+modalSubtitle: {
+  fontSize: 15,
+  color: '#666666',
+  marginBottom: 18,
+},
+
+optionButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: '#f5f5f5',
+  borderWidth: 1,
+  borderColor: '#dddddd',
+  borderRadius: 10,
+  padding: 14,
+  marginBottom: 10,
+},
+
+optionButtonSelected: {
+  backgroundColor: '#222222',
+  borderColor: '#222222',
+},
+
+optionInfo: {
+  flex: 1,
+},
+
+optionName: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#333333',
+},
+
+optionNameSelected: {
+  color: '#ffffff',
+},
+
+optionPrice: {
+  fontSize: 13,
+  color: '#666666',
+  marginTop: 3,
+},
+
+optionPriceSelected: {
+  color: '#ffffff',
+},
+
+radio: {
+  fontSize: 22,
+  marginLeft: 10,
+  color: '#ffffff',
+},
+
+modalButtons: {
+  flexDirection: 'row',
+  gap: 10,
+  marginTop: 10,
+},
+
+cancelButton: {
+  flex: 1,
+  paddingVertical: 13,
+  borderRadius: 10,
+  alignItems: 'center',
+  backgroundColor: '#eeeeee',
+},
+
+cancelButtonText: {
+  fontWeight: '700',
+  color: '#333333',
+},
+
+confirmButton: {
+  flex: 1,
+  paddingVertical: 13,
+  borderRadius: 10,
+  alignItems: 'center',
+  backgroundColor: '#222222',
+},
+
+confirmButtonDisabled: {
+  opacity: 0.4,
+},
+
+confirmButtonText: {
+  color: '#ffffff',
+  fontWeight: '700',
+},
   
 });

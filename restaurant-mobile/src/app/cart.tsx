@@ -1,18 +1,28 @@
+import { styles } from '@/styles/cart.styles';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  Text,
+  View
 } from 'react-native';
 
 import { clearCart, getCart, saveCart } from '@/services/cart';
 
+type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  optionId?: string | null;
+  optionName?: string | null;
+  optionPrice?: number;
+};
+
 export default function CartScreen() {
-  const [cart, setCart] = useState<any[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
     loadCart();
@@ -23,10 +33,17 @@ export default function CartScreen() {
     setCart(storedCart);
   };
 
-  const increaseQuantity = async (id: string) => {
+  const increaseQuantity = async (
+    id: string,
+    optionId?: string | null
+  ) => {
     const updatedCart = cart.map((item) =>
-      item.id === id
-        ? { ...item, quantity: item.quantity + 1 }
+      item.id === id &&
+        item.optionId === (optionId ?? null)
+        ? {
+          ...item,
+          quantity: item.quantity + 1,
+        }
         : item
     );
 
@@ -34,11 +51,18 @@ export default function CartScreen() {
     await saveCart(updatedCart);
   };
 
-  const decreaseQuantity = async (id: string) => {
+  const decreaseQuantity = async (
+    id: string,
+    optionId?: string | null
+  ) => {
     const updatedCart = cart
       .map((item) =>
-        item.id === id
-          ? { ...item, quantity: item.quantity - 1 }
+        item.id === id &&
+          item.optionId === (optionId ?? null)
+          ? {
+            ...item,
+            quantity: item.quantity - 1,
+          }
           : item
       )
       .filter((item) => item.quantity > 0);
@@ -49,28 +73,53 @@ export default function CartScreen() {
 
   const handleClearCart = async () => {
     await clearCart();
+
     setCart([]);
-    Alert.alert('Cart cleared', 'Your cart is now empty.');
+
+    Alert.alert(
+      'Cart cleared',
+      'Your cart is now empty.'
+    );
+  };
+
+  const getItemUnitPrice = (item: CartItem) => {
+    if (item.optionId) {
+      return item.optionPrice ?? item.price;
+    }
+
+    return item.price;
+  };
+
+  const getItemTotal = (item: CartItem) => {
+    return getItemUnitPrice(item) * item.quantity;
   };
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + getItemTotal(item),
     0
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.replace('/home')}>
-            <Text style={styles.back}>← Back</Text>
+        <Pressable
+          onPress={() => router.replace('/home')}
+        >
+          <Text style={styles.back}>
+            ← Back
+          </Text>
         </Pressable>
 
-        <Text style={styles.title}>Cart</Text>
+        <Text style={styles.title}>
+          Cart
+        </Text>
       </View>
 
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>Your cart is empty</Text>
+          <Text style={styles.emptyTitle}>
+            Your cart is empty
+          </Text>
 
           <Pressable
             style={styles.continueButton}
@@ -85,7 +134,9 @@ export default function CartScreen() {
         <>
           <FlatList
             data={cart}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) =>
+              `${item.id}-${item.optionId ?? 'no-option'}-${index}`
+            }
             renderItem={({ item }) => (
               <View style={styles.cartItem}>
                 <View style={styles.itemInfo}>
@@ -93,33 +144,56 @@ export default function CartScreen() {
                     {item.name}
                   </Text>
 
+                  {item.optionName ? (
+                    <Text style={styles.optionName}>
+                      Option: {item.optionName}
+                    </Text>
+                  ) : null}
+
                   <Text style={styles.itemPrice}>
-                    ${item.price.toFixed(2)}
+                    {getItemUnitPrice(item).toFixed(2)}
+                    {' '}
                   </Text>
                 </View>
 
-                <View style={styles.quantityContainer}>
-                  <Pressable
-                    style={styles.quantityButton}
-                    onPress={() =>
-                      decreaseQuantity(item.id)
-                    }
-                  >
-                    <Text style={styles.quantityText}>−</Text>
-                  </Pressable>
+                <View style={styles.rightSection}>
+                  <View style={styles.quantityContainer}>
+                    <Pressable
+                      style={styles.quantityButton}
+                      onPress={() =>
+                        decreaseQuantity(
+                          item.id,
+                          item.optionId
+                        )
+                      }
+                    >
+                      <Text style={styles.quantityText}>
+                        −
+                      </Text>
+                    </Pressable>
 
-                  <Text style={styles.quantity}>
-                    {item.quantity}
+                    <Text style={styles.quantity}>
+                      {item.quantity}
+                    </Text>
+
+                    <Pressable
+                      style={styles.quantityButton}
+                      onPress={() =>
+                        increaseQuantity(
+                          item.id,
+                          item.optionId
+                        )
+                      }
+                    >
+                      <Text style={styles.quantityText}>
+                        +
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  <Text style={styles.itemTotal}>
+                    ${getItemTotal(item).toFixed(2)}
                   </Text>
-
-                  <Pressable
-                    style={styles.quantityButton}
-                    onPress={() =>
-                      increaseQuantity(item.id)
-                    }
-                  >
-                    <Text style={styles.quantityText}>+</Text>
-                  </Pressable>
                 </View>
               </View>
             )}
@@ -127,7 +201,9 @@ export default function CartScreen() {
 
           <View style={styles.bottomContainer}>
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalLabel}>
+                Total
+              </Text>
 
               <Text style={styles.total}>
                 ${total.toFixed(2)}
@@ -136,7 +212,9 @@ export default function CartScreen() {
 
             <Pressable
               style={styles.checkoutButton}
-              onPress={() => router.push('/checkout')}
+              onPress={() =>
+                router.push('/checkout')
+              }
             >
               <Text style={styles.buttonText}>
                 Checkout
@@ -158,144 +236,4 @@ export default function CartScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 24,
-  },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-
-  back: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 25,
-  },
-
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-  },
-
-  continueButton: {
-    backgroundColor: '#222222',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-
-  cartItem: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  itemInfo: {
-    flex: 1,
-  },
-
-  itemName: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 5,
-  },
-
-  itemPrice: {
-    fontSize: 14,
-    color: '#666666',
-  },
-
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-
-  quantityButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#222222',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  quantityText: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
-  quantity: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  bottomContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#dddddd',
-    paddingTop: 18,
-  },
-
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-
-  totalLabel: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
-  total: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
-  checkoutButton: {
-    backgroundColor: '#222222',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-
-  clearButton: {
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  clearText: {
-    color: '#cc0000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});

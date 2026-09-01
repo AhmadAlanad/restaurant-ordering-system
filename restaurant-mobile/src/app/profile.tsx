@@ -1,25 +1,25 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 
 import {
-    getToken,
-    getUser,
-    logout,
-    saveAuth,
+  getToken,
+  getUser,
+  logout,
+  saveAuth,
 } from '@/services/auth';
 
 import {
-    changePassword,
-    getUserById,
-    updateUser,
+  changePassword,
+  getUserById,
+  updateUser,
 } from '@/services/user';
 
 import { styles } from '@/styles/profile.styles';
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
 
       setProfileMessage(
         error?.response?.data?.message ||
-          'Could not update your profile.'
+        'Could not update your profile.'
       );
       setProfileMessageType('error');
     } finally {
@@ -237,7 +237,7 @@ export default function ProfileScreen() {
 
       setPasswordMessage(
         error?.response?.data?.message ||
-          'Could not change your password.'
+        'Could not change your password.'
       );
       setPasswordMessageType('error');
     } finally {
@@ -483,8 +483,8 @@ export default function ProfileScreen() {
                 passwordMessageType === 'success'
                   ? styles.successMessage
                   : passwordMessageType === 'warning'
-                  ? styles.warningMessage
-                  : styles.errorMessage
+                    ? styles.warningMessage
+                    : styles.errorMessage
               }
             >
               {passwordMessage}
@@ -495,7 +495,7 @@ export default function ProfileScreen() {
             style={[
               styles.passwordButton,
               changingPassword &&
-                styles.buttonDisabled,
+              styles.buttonDisabled,
             ]}
             onPress={handleChangePassword}
             disabled={changingPassword}

@@ -7,6 +7,10 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
 
+  scrollContent: {
+    paddingBottom: 30,
+  },
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -213,12 +217,25 @@ export const styles = StyleSheet.create({
   },
 
   placeOrderButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
 
   placeOrderText: {
     color: '#ffffff',
     fontSize: 17,
     fontWeight: '700',
+  },
+
+  optionName: {
+    fontSize: 14,
+    color: '#444444',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+
+  itemUnitPrice: {
+    fontSize: 13,
+    color: '#666666',
+    marginTop: 4,
   },
 });
