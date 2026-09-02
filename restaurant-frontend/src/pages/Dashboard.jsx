@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
@@ -6,6 +6,7 @@ import "../styles/dashboard.css";
 function Dashboard() {
 
     const [orders, setOrders] = useState([]);
+	const notificationAudio = useRef(null);
     const navigate = useNavigate();
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -14,36 +15,121 @@ function Dashboard() {
     totalOrders: 0,
     pendingOrders: 0,
     });
-
-    useEffect(() => {
-        loadOrders();
-	loadDashboard();
-    }, []);
-
+	
+	
+	
 	const loadDashboard = async () => {
 
-    try {
+	    try {
 
-        const response = await api.get("/dashboard");
-	console.log("Dashboard:", response.data);
-        setDashboard(response.data);
+	        const response = await api.get("/dashboard");
 
-    } catch (error) {
+	        console.log("Dashboard:", response.data);
 
-        console.error(error);
+	        setDashboard(response.data);
 
-    }
+	    } catch (error) {
 
-};
+	        console.error(error);
 
-    const loadOrders = async () => {
-        try {
-            const response = await api.get("/orders");
-            setOrders(response.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+	    }
+
+	};
+
+	const loadOrders = async () => {
+
+	    try {
+
+	        const response = await api.get("/orders");
+
+	        const updatedOrders = response.data;
+
+	        setOrders(updatedOrders);
+
+	        const hasPendingOrders =
+	            updatedOrders.some(
+	                (order) => order.status === "PENDING"
+	            );
+
+	        if (hasPendingOrders) {
+
+	            notificationAudio.current?.play()
+	                .catch((error) => {
+	                    console.log(
+	                        "Notification sound could not play:",
+	                        error
+	                    );
+	                });
+
+	        } else {
+
+	            notificationAudio.current?.pause();
+
+	            if (notificationAudio.current) {
+	                notificationAudio.current.currentTime = 0;
+	            }
+
+	        }
+
+	    } catch (error) {
+
+	        console.error(error);
+
+	    }
+
+	};
+	
+	useEffect(() => {
+		    notificationAudio.current = new Audio(
+		        "/sounds/new-order.mp3"
+		    );
+
+		    notificationAudio.current.loop = true;
+
+		    return () => {
+		        notificationAudio.current.pause();
+		        notificationAudio.current = null;
+		    };
+		}, []);
+
+		useEffect(() => {
+
+		    loadOrders();
+
+		    loadDashboard();
+
+		    const interval = setInterval(() => {
+
+		        loadOrders();
+
+		        loadDashboard();
+
+		    }, 5000);
+
+		    return () => clearInterval(interval);
+
+		}, []);
+		
+		useEffect(() => {
+
+		    if (showOrderModal) {
+
+		        document.body.style.overflow = "hidden";
+
+		    } else {
+
+		        document.body.style.overflow = "auto";
+
+		    }
+
+		    return () => {
+
+		        document.body.style.overflow = "auto";
+
+		    };
+
+		}, [showOrderModal]);
+
 
 const refreshSelectedOrder = async (id) => {
 
@@ -428,310 +514,589 @@ const printOrder = () => {
             return "bg-secondary";
     }
 };
-    return (
+return (
+    <div className="container-fluid dashboard-page">
 
-    <div className="container mt-4">
+        {/* =========================
+            Dashboard Header
+        ========================= */}
 
-	<div className="row mb-4">
+        <div className="dashboard-header">
 
-    <div className="col-md-4 mb-3">
-        <div className="card text-center shadow">
-            <div className="card-body">
-                <h5>Total Orders</h5>
-                <h2>{dashboard.totalOrders}</h2>
-            </div>
-        </div>
-    </div>
+            <div>
+                <h1 className="dashboard-title">
+                    Admin Dashboard
+                </h1>
 
-    <div className="col-md-4 mb-3">
-        <div className="card text-center shadow">
-            <div className="card-body">
-                <h5>Pending</h5>
-                <h2 className="text-warning">
-                    {dashboard.pendingOrders}
-                </h2>
-            </div>
-        </div>
-    </div>
-
-
-<div className="col-md-6 mb-3">
-    <div className="card text-center shadow">
-        <div className="card-body">
-            <h5>Orders Today</h5>
-            <h2 className="text-info">
-                {dashboard.todayOrders}
-            </h2>
-        </div>
-    </div>
-</div>
-
-   <div className="mt-4 d-flex gap-3">
-
-    <button
-        className="btn btn-primary"
-        onClick={() => navigate("/admin/menu")}
-    >
-        Manage Menu
-    </button>
-
-    <button
-        className="btn btn-success"
-        onClick={() => navigate("/reports")}
-    >
-        Sales Reports
-    </button>
-
-</div>
-
-</div>
-
-        <h2>Admin Dashboard</h2>
-
-        {orders.map(order => (
-
-			<div
-			    key={order.id}
-			    className="card dashboard-order-card"
-			>
-
-        <div className="card-body">
-
-            <div className="d-flex justify-content-between align-items-center">
-
-                <h4>Order #{order.id.substring(0, 8)}</h4>
-
-                <span className={`badge ${getStatusBadge(order.status)}`}>
-                    {order.status}
-                </span>
-
+                <p className="dashboard-subtitle">
+                    Manage orders and monitor your restaurant
+                </p>
             </div>
 
-            <p className="mt-2 mb-1">
-                <strong>Customer:</strong> {order.customerName}
-            </p>
-
-            <p className="mb-3">
-                <strong>Total:</strong> {order.totalPrice} SR
-            </p>
-
-            <button
-                className="btn btn-primary btn-sm"
-                onClick={() => openOrderDetails(order)}
-            >
-                View Details
-            </button>
-
-        </div>
-
-    </div>
-
-))}
-
-{showOrderModal && selectedOrder && (
-
-	<div className="modal fade show d-block dashboard-modal">
-
-    <div className="modal-dialog modal-lg">
-
-        <div className="modal-content">
-
-            <div className="modal-header">
-
-                <h5 className="modal-title">
-                    Order #{selectedOrder.id.substring(0, 8)}
-                </h5>
+            <div className="d-flex gap-2">
 
                 <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowOrderModal(false)}
-                ></button>
+                    className="btn btn-primary"
+                    onClick={() => navigate("/admin/menu")}
+                >
+                    🍽️ Manage Menu
+                </button>
+
+                <button
+                    className="btn btn-success"
+                    onClick={() => navigate("/reports")}
+                >
+                    📊 Sales Reports
+                </button>
 
             </div>
 
-			<div
-			    className="modal-body"
-			    id="print-order"
-			>
+        </div>
 
-                <p>
-                    <strong>Customer:</strong> {selectedOrder.customerName}
-                </p>
 
-                <p>
-                    <strong>Phone:</strong> {selectedOrder.customerPhone}
-                </p>
-				
-				<p>
-				    <strong>Order Date:</strong>{" "}
-				    {new Date(selectedOrder.orderDate).toLocaleString()}
-				</p>
+        {/* =========================
+            Statistics
+        ========================= */}
 
-				<p>
-				    <strong>📍 Address:</strong>{" "}
-				    {selectedOrder.addressLabel}
-				</p>
+        <div className="row g-4">
 
-				<p>
-				    <strong>Description:</strong>{" "}
-				    {selectedOrder.addressDescription}
-				</p>
+            <div className="col-md-6 col-lg-3">
 
-{selectedOrder.latitude !== null &&
- selectedOrder.longitude !== null && (
+                <div className="card dashboard-stat-card">
 
-    <div className="mt-3">
+                    <div className="card-body">
 
-        <a
-            href={`https://www.google.com/maps?q=${selectedOrder.latitude},${selectedOrder.longitude}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-outline-primary"
-        >
-            📍 View Customer Location
-        </a>
+                        <div className="dashboard-stat-label">
+                            Total Orders
+                        </div>
 
-    </div>
-
-)}
-
-<p>
-    <strong>Payment Method:</strong>{" "} {selectedOrder.paymentMethod === "CASH"
-        ? "💵 Cash"
-        : "💳 Credit Card"}
-</p>
-
-                <hr />
-
-                <h5>Order Items</h5>
-
-                <ul className="list-group dashboard-order-items">
-
-                    {selectedOrder.items.map((item, index) => (
-
-                        <li
-                            key={index}
-                            className="list-group-item d-flex justify-content-between"
-                        >
-
-						<span>
-						    {item.itemName}
-						    {item.optionName && (
-						        <> — {item.optionName}</>
-						    )}
-						    {" × "}
-						    {item.quantity}
-						</span>
-
-                            <span>
-                                {item.price * item.quantity} SR
-                            </span>
-
-                        </li>
-
-                    ))}
-
-                </ul>
-
-                <h4 className="text-success">
-                    Total: {selectedOrder.totalPrice} SR
-                </h4>
-
-		{selectedOrder.customerNote && (
-
-    		<div className="alert alert-warning dashboard-customer-note">
-
-        		<h5>📝 Customer Note </h5>
-
-        		<p className="mb-0">
-            		{selectedOrder.customerNote}
-        		</p>
-
-    		</div>
-
-		)}
-
-                {selectedOrder.rejectionReason && (
-
-                    <div className="alert alert-danger dashboard-rejection-reason">
-
-                        <strong>Reason:</strong> {selectedOrder.rejectionReason}
+                        <h2 className="dashboard-stat-number">
+                            {dashboard.totalOrders}
+                        </h2>
 
                     </div>
 
-                )}
+                </div>
 
             </div>
 
-            <div className="modal-footer">
 
-    {selectedOrder.status === "PENDING" && (
-        <>
-            <button
-                className="btn btn-success"
-                onClick={() => acceptOrder(selectedOrder.id)}
-            >
-                Accept
-            </button>
+            <div className="col-md-6 col-lg-3">
 
-            <button
-                className="btn btn-danger"
-                onClick={() => rejectOrder(selectedOrder.id)}
-            >
-                Reject
-            </button>
-        </>
-    )}
+                <div className="card dashboard-stat-card">
 
-    {selectedOrder.status === "ACCEPTED" && (
-        <button
-            className="btn btn-primary"
-            onClick={() => preparingOrder(selectedOrder.id)}
-        >
-            Preparing
-        </button>
-    )}
+                    <div className="card-body">
 
-    {selectedOrder.status === "PREPARING" && (
-        <button
-            className="btn btn-info"
-            onClick={() => readyOrder(selectedOrder.id)}
-        >
-            Ready
-        </button>
-    )}
+                        <div className="dashboard-stat-label">
+                            Pending Orders
+                        </div>
 
-    {selectedOrder.status === "READY" && (
-        <button
-            className="btn btn-dark"
-            onClick={() => deliveredOrder(selectedOrder.id)}
-        >
-            Delivered
-        </button>
-    )}
-	
-	<button
-	    className="btn btn-outline-dark"
-	    onClick={printOrder}
-	>
-	    🖨️ Print Order
-	</button>
+                        <h2 className="dashboard-stat-number text-warning">
+                            {dashboard.pendingOrders}
+                        </h2>
 
-    <button
-        className="btn btn-secondary"
-        onClick={() => setShowOrderModal(false)}
-    >
-        Close
-    </button>
+                    </div>
 
+                </div>
+
+            </div>
+
+
+            <div className="col-md-6 col-lg-3">
+
+                <div className="card dashboard-stat-card">
+
+                    <div className="card-body">
+
+                        <div className="dashboard-stat-label">
+                            Orders Today
+                        </div>
+
+                        <h2 className="dashboard-stat-number text-info">
+                            {dashboard.todayOrders}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div className="col-md-6 col-lg-3">
+
+                <div className="card dashboard-stat-card">
+
+                    <div className="card-body">
+
+                        <div className="dashboard-stat-label">
+                            Current Status
+                        </div>
+
+                        <h2 className="dashboard-stat-number text-success">
+                            Active
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {/* =========================
+            Orders Section
+        ========================= */}
+
+        <div className="dashboard-orders-section">
+
+            <h2 className="dashboard-orders-title">
+                Recent Orders
+            </h2>
+
+
+			{orders.map(order => (
+			    <div
+			        key={order.id}
+			        className="card dashboard-order-card"
+			        onClick={() => openOrderDetails(order)}
+			    >
+			        <div className="card-body">
+
+			            <div
+			                className={`dashboard-order-header order-status-${order.status.toLowerCase()}`}
+			            >
+			                <div>
+			                    <h4>
+			                        Order #{order.id.substring(0, 8)}
+			                    </h4>
+
+			                    <small>
+			                        {new Date(order.orderDate).toLocaleString()}
+			                    </small>
+			                </div>
+
+			                <span
+			                    className={`badge ${getStatusBadge(order.status)}`}
+			                >
+			                    {order.status}
+			                </span>
+			            </div>
+
+			            <div className="dashboard-order-info">
+
+			                <div>
+			                    <span className="dashboard-order-label">
+			                        Customer
+			                    </span>
+
+			                    <strong>
+			                        👤 {order.customerName}
+			                    </strong>
+			                </div>
+
+			                <div>
+			                    <span className="dashboard-order-label">
+			                        Phone
+			                    </span>
+
+			                    <strong>
+			                        📞 {order.customerPhone}
+			                    </strong>
+			                </div>
+
+			                <div>
+			                    <span className="dashboard-order-label">
+			                        Total
+			                    </span>
+
+			                    <strong className="dashboard-order-price">
+			                        {order.totalPrice} SR
+			                    </strong>
+			                </div>
+
+			            </div>
+
+			        </div>
+			    </div>
+			))}
 </div>
+
+
+{showOrderModal && selectedOrder && (
+
+    <div className="modal fade show d-block dashboard-modal">
+
+        <div className="modal-dialog modal-lg modal-dialog-scrollable">
+
+            <div className="modal-content">
+
+                {/* Modal Header */}
+                <div className="modal-header">
+
+                    <div>
+					<div className="d-flex align-items-center gap-2">
+
+					    <h5 className="modal-title mb-0">
+
+					        Order #{selectedOrder.id.substring(0, 8)}
+
+					    </h5>
+
+					    <span
+					        className={`badge ${getStatusBadge(
+					            selectedOrder.status
+					        )}`}
+					    >
+					        {selectedOrder.status}
+					    </span>
+
+					</div>
+
+                        <small className="text-muted">
+                            {new Date(
+                                selectedOrder.orderDate
+                            ).toLocaleString()}
+                        </small>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setShowOrderModal(false)}
+                    ></button>
+
+                </div>
+
+
+                {/* Modal Body */}
+                <div
+                    className="modal-body"
+                    id="print-order"
+                >
+
+				
+
+				{/* Customer / Delivery / Payment Information */}
+
+				<div className="dashboard-modal-compact-info">
+
+				
+				<div>
+
+				    <span className="dashboard-modal-label">
+				        Customer
+				    </span>
+
+				    <strong>
+				        {selectedOrder.customerName}
+				    </strong>
+
+				</div>
+
+
+				<div>
+
+				    <span className="dashboard-modal-label">
+				        Phone
+				    </span>
+
+				    <strong>
+				        {selectedOrder.customerPhone}
+				    </strong>
+
+				</div>
+
+
+				<div>
+
+				    <span className="dashboard-modal-label">
+				        Payment
+				    </span>
+
+				    <strong>
+				        {selectedOrder.paymentMethod === "CASH"
+				            ? "💵 Cash"
+				            : "💳 Credit Card"}
+				    </strong>
+
+				</div>
+
+
+				<div>
+
+				    <span className="dashboard-modal-label">
+				        Address
+				    </span>
+
+				    <strong>
+				        {selectedOrder.addressLabel}
+				    </strong>
+
+				</div>
+
+
+				<div className="dashboard-modal-address-description">
+
+				    <span className="dashboard-modal-label">
+				        Description
+				    </span>
+
+				    <strong>
+				        {selectedOrder.addressDescription}
+				    </strong>
+
+				</div>
+				
+
+				</div>
+
+				{/* Customer Location */}
+				{selectedOrder.latitude !== null &&
+				selectedOrder.longitude !== null && (
+
+				
+				    <div className="dashboard-modal-location">
+
+				        <a
+				            href={`https://www.google.com/maps?q=${selectedOrder.latitude},${selectedOrder.longitude}`}
+				            target="_blank"
+				            rel="noopener noreferrer"
+				            className="btn btn-outline-primary"
+				        >
+				            📍 View Customer Location
+				        </a>
+
+				    </div>
+
+				)}
+				
+
+
+                    {/* Order Items */}
+                    <div className="dashboard-modal-section">
+
+                        <h6 className="dashboard-modal-section-title">
+                            🧾 Order Items
+                        </h6>
+
+                        <div className="dashboard-order-items">
+
+						
+						{selectedOrder.items.map((item, index) => (
+
+						    <div
+						        key={index}
+						        className="dashboard-modal-item"
+						    >
+
+						        {/* Item Image */}
+						        {item.imageUrl ? (
+
+						            <img
+						                src={`http://localhost:8081/images/${item.imageUrl}`}
+						                alt={item.itemName}
+						                className="dashboard-modal-item-image"
+						            />
+
+						        ) : (
+
+						            <div className="dashboard-modal-item-image-placeholder">
+						                🍽️
+						            </div>
+
+						        )}
+
+
+						        {/* Item Information */}
+						        <div className="dashboard-modal-item-details">
+
+						            <strong>
+						                {item.itemName}
+						            </strong>
+
+						            {item.optionName && (
+						                <small>
+						                    {item.optionName}
+						                </small>
+						            )}
+
+						            <span>
+						                Quantity: {item.quantity}
+						            </span>
+
+						        </div>
+
+
+						        {/* Item Price */}
+						        <strong className="dashboard-order-price">
+						            {item.price * item.quantity} SR
+						        </strong>
+
+						    </div>
+
+						))}
+						
+
+                        </div>
+
+
+                        {/* Total */}
+                        <div className="dashboard-modal-total">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <strong>
+                                {selectedOrder.totalPrice} SR
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* Customer Note */}
+                    {selectedOrder.customerNote && (
+
+                        <div className="alert alert-warning dashboard-customer-note">
+
+                            <h5>
+                                📝 Customer Note
+                            </h5>
+
+                            <p className="mb-0">
+                                {selectedOrder.customerNote}
+                            </p>
+
+                        </div>
+
+                    )}
+
+
+                    {/* Rejection Reason */}
+                    {selectedOrder.rejectionReason && (
+
+                        <div className="alert alert-danger dashboard-rejection-reason">
+
+                            <h5>
+                                ❌ Rejection Reason
+                            </h5>
+
+                            <p className="mb-0">
+                                {selectedOrder.rejectionReason}
+                            </p>
+
+                        </div>
+
+                    )}
+
+                </div>
+
+
+                
+				{/* Modal Footer */}
+				<div className="modal-footer">
+
+				    <div className="dashboard-status-actions">
+
+				        {/* Accept */}
+				        <button
+				            className="btn btn-success"
+				            disabled={selectedOrder.status !== "PENDING"}
+				            onClick={() =>
+				                acceptOrder(selectedOrder.id)
+				            }
+				        >
+				            ✓ Accept
+				        </button>
+
+
+				        {/* Reject */}
+				        <button
+				            className="btn btn-danger"
+				            disabled={selectedOrder.status !== "PENDING"}
+				            onClick={() =>
+				                rejectOrder(selectedOrder.id)
+				            }
+				        >
+				            ✕ Reject
+				        </button>
+
+
+				        {/* Preparing */}
+				        <button
+				            className="btn btn-primary"
+				            disabled={selectedOrder.status !== "ACCEPTED"}
+				            onClick={() =>
+				                preparingOrder(selectedOrder.id)
+				            }
+				        >
+				            🍳 Preparing
+				        </button>
+
+
+				        {/* Ready */}
+				        <button
+				            className="btn btn-info"
+				            disabled={selectedOrder.status !== "PREPARING"}
+				            onClick={() =>
+				                readyOrder(selectedOrder.id)
+				            }
+				        >
+				            ✓ Ready
+				        </button>
+
+
+				        {/* Delivered */}
+				        <button
+				            className="btn btn-dark"
+				            disabled={selectedOrder.status !== "READY"}
+				            onClick={() =>
+				                deliveredOrder(selectedOrder.id)
+				            }
+				        >
+				            🚚 Delivered
+				        </button>
+
+				    </div>
+
+
+				    <div className="dashboard-secondary-actions">
+
+				        {/* Print */}
+				        <button
+				            className="btn btn-outline-dark"
+				            onClick={printOrder}
+				        >
+				            🖨️ Print Order
+				        </button>
+
+
+				        {/* Close */}
+				        <button
+				            className="btn btn-secondary"
+				            onClick={() =>
+				                setShowOrderModal(false)
+				            }
+				        >
+				            Close
+				        </button>
+
+				    </div>
+
+				</div>
+				
+
+
+            </div>
 
         </div>
 
     </div>
-
-</div>
 
 )}
 
