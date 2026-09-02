@@ -1,3 +1,4 @@
+import { getRestaurantStatus } from '@/services/restaurant';
 import { styles } from '@/styles/checkout.styles';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -5,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -26,6 +28,7 @@ type CartItem = {
   optionId?: string | null;
   optionName?: string | null;
   optionPrice?: number;
+  imageUrl?: string;
 };
 
 type Address = {
@@ -39,6 +42,7 @@ type Address = {
 export default function CheckoutScreen() {
   const [user, setUser] = useState<any>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [restaurantOpen, setRestaurantOpen] = useState(true);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] =
     useState<Address | null>(null);
@@ -60,6 +64,9 @@ export default function CheckoutScreen() {
 
       const storedCart = await getCart();
       setCart(storedCart);
+
+      const restaurantStatus = await getRestaurantStatus();
+      setRestaurantOpen(restaurantStatus.open);
 
       if (storedUser) {
         const userAddresses = await getAddresses(storedUser.id);
@@ -193,10 +200,16 @@ export default function CheckoutScreen() {
     >
       <View style={styles.header}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/cart');
+            }
+          }}
           style={styles.backButton}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>← Cart</Text>
         </Pressable>
 
         <Text style={styles.title}>
@@ -324,6 +337,16 @@ export default function CheckoutScreen() {
         style={styles.cartList}
         renderItem={({ item }) => (
           <View style={styles.cartItem}>
+            {item.imageUrl ? (
+              <Image
+                source={{
+                  uri: `http://localhost:8081/images/${item.imageUrl}`,
+                }}
+                style={styles.itemImage}
+                resizeMode="cover"
+              />
+            ) : null}
+
             <View style={styles.itemInfo}>
               <Text style={styles.itemName}>
                 {item.name}
@@ -377,19 +400,29 @@ export default function CheckoutScreen() {
           multiline
         />
 
+        {!restaurantOpen && (
+          <View style={styles.closedMessage}>
+            <Text style={styles.closedMessageText}>
+              The restaurant is currently closed. Please try again later.
+            </Text>
+          </View>
+        )}
+
         <Pressable
           style={[
             styles.placeOrderButton,
-            placingOrder &&
+            (placingOrder || !restaurantOpen) &&
             styles.placeOrderButtonDisabled,
           ]}
           onPress={handlePlaceOrder}
-          disabled={placingOrder}
+          disabled={placingOrder || !restaurantOpen}
         >
           <Text style={styles.placeOrderText}>
             {placingOrder
               ? 'Placing Order...'
-              : 'Place Order'}
+              : !restaurantOpen
+                ? 'Restaurant Closed'
+                : 'Place Order'}
           </Text>
         </Pressable>
       </View>

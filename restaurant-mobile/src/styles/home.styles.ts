@@ -23,36 +23,36 @@ export const styles = StyleSheet.create({
   },
 
   headerButtons: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  gap: 10,
-  marginTop: 15,
-},
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 15,
+  },
 
- headerButton: {
-  backgroundColor: '#222222',
-  flex: 1,
-  minWidth: '45%',
-  height: 42,
-  borderRadius: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
-},
+  headerButton: {
+    backgroundColor: '#222222',
+    flex: 1,
+    minWidth: '45%',
+    height: 42,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-logoutButton: {
-  backgroundColor: '#cc0000',
-  flex: 1,
-  minWidth: '45%',
-  height: 42,
-  borderRadius: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
-},
+  logoutButton: {
+    backgroundColor: '#cc0000',
+    flex: 1,
+    minWidth: '45%',
+    height: 42,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-headerButtonText: {
-  color: '#ffffff',
-  fontWeight: '700',
-},
+  headerButtonText: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
 
   menuTitle: {
     fontSize: 24,
@@ -157,147 +157,202 @@ headerButtonText: {
   },
 
   menuHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 15,
-},
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
 
-cartButton: {
-  backgroundColor: '#222222',
-  paddingHorizontal: 16,
-  height: 42,
-  borderRadius: 10,
+  cartButton: {
+    backgroundColor: '#222222',
+    paddingHorizontal: 16,
+    height: 42,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+
+  cartButtonText: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+
+  cartMessage: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 15,
+  },
+
+  cartMessageText: {
+    color: '#2e7d32',
+    fontWeight: '600',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  optionModal: {
+    width: '100%',
+    maxWidth: 450,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 5,
+  },
+
+  modalSubtitle: {
+    fontSize: 15,
+    color: '#666666',
+    marginBottom: 18,
+  },
+
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+  },
+
+  optionButtonSelected: {
+    backgroundColor: '#222222',
+    borderColor: '#222222',
+  },
+
+  optionInfo: {
+    flex: 1,
+  },
+
+  optionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+  },
+
+  optionNameSelected: {
+    color: '#ffffff',
+  },
+
+  optionPrice: {
+    fontSize: 13,
+    color: '#666666',
+    marginTop: 3,
+  },
+
+  optionPriceSelected: {
+    color: '#ffffff',
+  },
+
+  radio: {
+    fontSize: 22,
+    marginLeft: 10,
+    color: '#ffffff',
+  },
+
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
+
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#eeeeee',
+  },
+
+  cancelButtonText: {
+    fontWeight: '700',
+    color: '#333333',
+  },
+
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#222222',
+  },
+
+  confirmButtonDisabled: {
+    opacity: 0.4,
+  },
+
+  confirmButtonText: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  menuImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginRight: 15,
+  },
+
+  restaurantStatus: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+
+  restaurantOpen: {
+    backgroundColor: '#25d353',
+  },
+
+  restaurantClosed: {
+    backgroundColor: '#d82828',
+  },
+
+  restaurantStatusText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+
+  addButtonDisabled: {
+    opacity: 0.5,
+  },
+
+  notificationButtonContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
   justifyContent: 'center',
 },
 
-cartButtonText: {
-  color: '#ffffff',
-  fontWeight: '700',
-},
-
-cartMessage: {
-  backgroundColor: '#e8f5e9',
-  borderRadius: 10,
-  paddingVertical: 10,
-  paddingHorizontal: 14,
-  marginBottom: 15,
-},
-
-cartMessageText: {
-  color: '#2e7d32',
-  fontWeight: '600',
-},
-
-modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+notificationBadge: {
+  minWidth: 22,
+  height: 22,
+  borderRadius: 11,
+  backgroundColor: '#dc2626',
+  alignItems: 'center',
   justifyContent: 'center',
-  alignItems: 'center',
-  padding: 20,
+  marginLeft: 8,
+  paddingHorizontal: 5,
 },
 
-optionModal: {
-  width: '100%',
-  maxWidth: 450,
-  backgroundColor: '#ffffff',
-  borderRadius: 16,
-  padding: 20,
-},
-
-modalTitle: {
-  fontSize: 22,
-  fontWeight: '700',
-  marginBottom: 5,
-},
-
-modalSubtitle: {
-  fontSize: 15,
-  color: '#666666',
-  marginBottom: 18,
-},
-
-optionButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  backgroundColor: '#f5f5f5',
-  borderWidth: 1,
-  borderColor: '#dddddd',
-  borderRadius: 10,
-  padding: 14,
-  marginBottom: 10,
-},
-
-optionButtonSelected: {
-  backgroundColor: '#222222',
-  borderColor: '#222222',
-},
-
-optionInfo: {
-  flex: 1,
-},
-
-optionName: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#333333',
-},
-
-optionNameSelected: {
+notificationBadgeText: {
   color: '#ffffff',
+  fontSize: 12,
+  fontWeight: 'bold',
 },
 
-optionPrice: {
-  fontSize: 13,
-  color: '#666666',
-  marginTop: 3,
-},
-
-optionPriceSelected: {
-  color: '#ffffff',
-},
-
-radio: {
-  fontSize: 22,
-  marginLeft: 10,
-  color: '#ffffff',
-},
-
-modalButtons: {
-  flexDirection: 'row',
-  gap: 10,
-  marginTop: 10,
-},
-
-cancelButton: {
-  flex: 1,
-  paddingVertical: 13,
-  borderRadius: 10,
-  alignItems: 'center',
-  backgroundColor: '#eeeeee',
-},
-
-cancelButtonText: {
-  fontWeight: '700',
-  color: '#333333',
-},
-
-confirmButton: {
-  flex: 1,
-  paddingVertical: 13,
-  borderRadius: 10,
-  alignItems: 'center',
-  backgroundColor: '#222222',
-},
-
-confirmButtonDisabled: {
-  opacity: 0.4,
-},
-
-confirmButtonText: {
-  color: '#ffffff',
-  fontWeight: '700',
-},
-  
 });

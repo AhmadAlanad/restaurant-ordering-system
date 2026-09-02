@@ -267,6 +267,16 @@ public class OrderService {
 
         Order order = findOrderById(id);
 
+        if (order.getStatus() == OrderStatus.ACCEPTED) {
+            return order;
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Order must be PENDING before it can be accepted"
+            );
+        }
+
         order.setStatus(OrderStatus.ACCEPTED);
 
         Order savedOrder = orderRepository.save(order);
@@ -282,10 +292,20 @@ public class OrderService {
 
 
     public Order rejectOrder(
-    		UUID id,
+            UUID id,
             RejectOrderDTO rejectRequest) {
 
         Order order = findOrderById(id);
+
+        if (order.getStatus() == OrderStatus.REJECTED) {
+            return order;
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Order must be PENDING before it can be rejected"
+            );
+        }
 
         order.setStatus(OrderStatus.REJECTED);
 
@@ -310,6 +330,16 @@ public class OrderService {
 
         Order order = findOrderById(id);
 
+        if (order.getStatus() == OrderStatus.PREPARING) {
+            return order;
+        }
+
+        if (order.getStatus() != OrderStatus.ACCEPTED) {
+            throw new IllegalStateException(
+                    "Order must be ACCEPTED before it can be marked as PREPARING"
+            );
+        }
+
         order.setStatus(OrderStatus.PREPARING);
 
         Order savedOrder = orderRepository.save(order);
@@ -328,6 +358,16 @@ public class OrderService {
 
         Order order = findOrderById(id);
 
+        if (order.getStatus() == OrderStatus.READY) {
+            return order;
+        }
+
+        if (order.getStatus() != OrderStatus.PREPARING) {
+            throw new IllegalStateException(
+                    "Order must be PREPARING before it can be marked as READY"
+            );
+        }
+
         order.setStatus(OrderStatus.READY);
 
         Order savedOrder = orderRepository.save(order);
@@ -345,6 +385,16 @@ public class OrderService {
     public Order deliveredOrder(UUID id) {
 
         Order order = findOrderById(id);
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            return order;
+        }
+
+        if (order.getStatus() != OrderStatus.READY) {
+            throw new IllegalStateException(
+                    "Order must be READY before it can be marked as DELIVERED"
+            );
+        }
 
         order.setStatus(OrderStatus.DELIVERED);
 

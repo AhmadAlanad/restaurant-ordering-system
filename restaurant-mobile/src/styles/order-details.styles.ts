@@ -272,85 +272,92 @@ export const styles = StyleSheet.create({
   },
 
   orderDate: {
-  fontSize: 14,
-  color: '#777777',
-  marginTop: 4,
-},
+    fontSize: 14,
+    color: '#777777',
+    marginTop: 4,
+  },
 
-progressContainer: {
-  paddingTop: 10,
-},
+  progressContainer: {
+    paddingTop: 10,
+  },
 
-progressStep: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  minHeight: 50,
-},
+  progressStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 50,
+  },
 
-progressCircle: {
-  width: 30,
-  height: 30,
-  borderRadius: 15,
-  borderWidth: 2,
-  borderColor: '#cccccc',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#ffffff',
-},
+  progressCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#cccccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+  },
 
-progressCircleCompleted: {
-  backgroundColor: '#d1e7dd',
-  borderColor: '#198754',
-},
+  progressCircleCompleted: {
+    backgroundColor: '#d1e7dd',
+    borderColor: '#198754',
+  },
 
-progressCircleCurrent: {
-  borderWidth: 3,
-},
+  progressCircleCurrent: {
+    borderWidth: 3,
+  },
 
-progressCircleText: {
-  fontSize: 14,
-  fontWeight: '700',
-  color: '#999999',
-},
+  progressCircleText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#999999',
+  },
 
-progressCircleTextCompleted: {
-  color: '#198754',
-},
+  progressCircleTextCompleted: {
+    color: '#198754',
+  },
 
-progressLabel: {
-  fontSize: 15,
-  color: '#777777',
-  marginLeft: 12,
-},
+  progressLabel: {
+    fontSize: 15,
+    color: '#777777',
+    marginLeft: 12,
+  },
 
-progressLabelCurrent: {
-  fontWeight: '700',
-  color: '#222222',
-},
+  progressLabelCurrent: {
+    fontWeight: '700',
+    color: '#222222',
+  },
 
-progressLine: {
-  position: 'absolute',
-  left: 14,
-  top: 40,
-  width: 2,
-  height: 30,
-  backgroundColor: '#dddddd',
-},
+  progressLine: {
+    position: 'absolute',
+    left: 14,
+    top: 40,
+    width: 2,
+    height: 30,
+    backgroundColor: '#dddddd',
+  },
 
-progressLineCompleted: {
-  backgroundColor: '#198754',
-},
+  progressLineCompleted: {
+    backgroundColor: '#198754',
+  },
 
-rejectedStatus: {
-  fontSize: 17,
-  fontWeight: '700',
-  color: '#842029',
-  marginBottom: 8,
-},
+  rejectedStatus: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#842029',
+    marginBottom: 8,
+  },
 
-rejectionReason: {
-  fontSize: 15,
-  color: '#666666',
-  lineHeight: 22,
-},
+  rejectionReason: {
+    fontSize: 15,
+    color: '#666666',
+    lineHeight: 22,
+  },
+
+  itemImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+    marginRight: 12,
+  },
 });

@@ -2,11 +2,14 @@ import { getToken, getUser, logout } from '@/services/auth';
 import { getCart, saveCart } from '@/services/cart';
 import { getCategories } from '@/services/category';
 import { getMenuItems } from '@/services/menu';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { getUnreadNotifications } from '@/services/notification';
+import { getRestaurantStatus } from '@/services/restaurant';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   Pressable,
   Text,
@@ -43,7 +46,7 @@ export default function HomeScreen() {
   const [error, setError] = useState('');
   const [selectedItem, setSelectedItem] =
     useState<MenuItem | null>(null);
-
+  const [restaurantOpen, setRestaurantOpen] = useState(true);
   const [selectedOption, setSelectedOption] =
     useState<MenuItemOption | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
@@ -51,6 +54,7 @@ export default function HomeScreen() {
     useState<string | null>(null);
   const [cart, setCart] = useState<any[]>([]);
   const [cartMessage, setCartMessage] = useState('');
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   useEffect(() => {
     checkAuthentication();
@@ -76,7 +80,15 @@ export default function HomeScreen() {
       const storedUser = await getUser();
       setUser(storedUser);
 
+      const restaurantStatus =
+        await getRestaurantStatus();
+
+      setRestaurantOpen(restaurantStatus.open);
+
       const items = await getMenuItems();
+
+      console.log('MENU ITEMS:', JSON.stringify(items, null, 2));
+
       setMenuItems(items);
 
       const categoriesData = await getCategories();
@@ -93,6 +105,25 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
+
+  const loadUnreadNotificationCount = async () => {
+    try {
+      const unreadNotifications = await getUnreadNotifications();
+
+      setUnreadNotificationCount(unreadNotifications.length);
+    } catch (error: any) {
+      console.log(
+        'Unread notifications error:',
+        error?.response?.data || error
+      );
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUnreadNotificationCount();
+    }, [])
+  );
 
   const handleLogout = async () => {
     console.log('LOGOUT BUTTON PRESSED');
@@ -122,6 +153,17 @@ export default function HomeScreen() {
     item: MenuItem,
     option?: MenuItemOption
   ) => {
+    if (!restaurantOpen) {
+      setCartMessage(
+        'The restaurant is currently closed.'
+      );
+
+      setTimeout(() => {
+        setCartMessage('');
+      }, 2000);
+
+      return;
+    }
     const existingItem = cart.find(
       (cartItem) =>
         cartItem.id === item.id &&
@@ -173,31 +215,51 @@ export default function HomeScreen() {
     item: MenuItem;
   }) => {
     return (
-      <View style={styles.menuCard}>
-        <View style={styles.menuInfo}>
+      < View style={styles.menuCard} >
+        {
+          item.imageUrl ? (
+            <Image
+              source={{
+                uri: `http://localhost:8081/images/${item.imageUrl}`,
+              }}
+              style={styles.menuImage}
+              resizeMode="cover"
+            />
+          ) : null
+        }
+
+        < View style={styles.menuInfo} >
           <Text style={styles.menuName}>
             {item.name}
           </Text>
 
-          {item.category?.name ? (
-            <Text style={styles.category}>
-              {item.category.name}
-            </Text>
-          ) : null}
+          {
+            item.category?.name ? (
+              <Text style={styles.category}>
+                {item.category.name}
+              </Text>
+            ) : null
+          }
 
-          {item.description ? (
-            <Text style={styles.description}>
-              {item.description}
-            </Text>
-          ) : null}
+          {
+            item.description ? (
+              <Text style={styles.description}>
+                {item.description}
+              </Text>
+            ) : null
+          }
 
           <Text style={styles.price}>
             ${item.price.toFixed(2)}
           </Text>
-        </View>
+        </View >
 
         <Pressable
-          style={styles.addButton}
+          style={[
+            styles.addButton,
+            !restaurantOpen && styles.addButtonDisabled,
+          ]}
+          disabled={!restaurantOpen}
           onPress={() => {
             if (item.options && item.options.length > 0) {
               setSelectedItem(item);
@@ -208,10 +270,10 @@ export default function HomeScreen() {
           }}
         >
           <Text style={styles.addButtonText}>
-            Add
+            {restaurantOpen ? 'Add' : 'Closed'}
           </Text>
         </Pressable>
-      </View>
+      </View >
     );
   };
 
@@ -229,6 +291,21 @@ export default function HomeScreen() {
             : ''}
           !
         </Text>
+
+        <View
+          style={[
+            styles.restaurantStatus,
+            restaurantOpen
+              ? styles.restaurantOpen
+              : styles.restaurantClosed,
+          ]}
+        >
+          <Text style={styles.restaurantStatusText}>
+            {restaurantOpen
+              ? '● Restaurant Open'
+              : '● Restaurant Closed'}
+          </Text>
+        </View>
 
 
         <View style={styles.headerButtons}>
@@ -252,6 +329,25 @@ export default function HomeScreen() {
             <Text style={styles.headerButtonText}>
               My Orders
             </Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.headerButton}
+            onPress={() => router.push('/notifications')}
+          >
+            <View style={styles.notificationButtonContent}>
+              <Text style={styles.headerButtonText}>
+                🔔 Notifications
+              </Text>
+
+              {unreadNotificationCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadNotificationCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           </Pressable>
 
           <Pressable

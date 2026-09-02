@@ -238,4 +238,26 @@ export const styles = StyleSheet.create({
     color: '#666666',
     marginTop: 4,
   },
+
+  itemImage: {
+  width: 60,
+  height: 60,
+  borderRadius: 10,
+  marginRight: 12,
+},
+
+closedMessage: {
+  marginTop: 16,
+  padding: 12,
+  borderRadius: 8,
+  backgroundColor: '#ffe0e0',
+},
+
+closedMessageText: {
+  color: '#b00020',
+  fontSize: 14,
+  fontWeight: '600',
+  textAlign: 'center',
+},
+
 });

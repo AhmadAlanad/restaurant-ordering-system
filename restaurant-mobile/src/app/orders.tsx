@@ -190,12 +190,16 @@ export default function OrdersScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Pressable
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/home');
+            }
+          }}
           style={styles.backButton}
-          onPress={() => router.replace('/home')}
         >
-          <Text style={styles.backText}>
-            ← Home
-          </Text>
+          <Text style={styles.backText}>← Home</Text>
         </Pressable>
 
         <Text style={styles.title}>

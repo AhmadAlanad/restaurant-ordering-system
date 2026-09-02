@@ -15,6 +15,8 @@ public class OrderItemResponseDTO {
     private int quantity;
 
     private double price;
+    
+    private String imageUrl;
 
     public OrderItemResponseDTO() {
     }
@@ -65,5 +67,13 @@ public class OrderItemResponseDTO {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+    
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

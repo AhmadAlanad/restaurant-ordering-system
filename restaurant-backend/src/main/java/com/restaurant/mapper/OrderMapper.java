@@ -34,15 +34,38 @@ public class OrderMapper {
 
             OrderItemResponseDTO itemDTO = new OrderItemResponseDTO();
 
-            itemDTO.setItemName(orderItem.getMenuItem().getName());
+            // Menu item information
+            itemDTO.setMenuItemId(
+                    orderItem.getMenuItem().getId()
+            );
 
+            itemDTO.setItemName(
+                    orderItem.getMenuItem().getName()
+            );
+
+            itemDTO.setImageUrl(
+                    orderItem.getMenuItem().getImageUrl()
+            );
+
+            // Selected option
             if (orderItem.getOption() != null) {
-                itemDTO.setOptionId(orderItem.getOption().getId());
-                itemDTO.setOptionName(orderItem.getOption().getName());
+                itemDTO.setOptionId(
+                        orderItem.getOption().getId()
+                );
+
+                itemDTO.setOptionName(
+                        orderItem.getOption().getName()
+                );
             }
 
-            itemDTO.setPrice(orderItem.getPrice());
-            itemDTO.setQuantity(orderItem.getQuantity());
+            // Order information
+            itemDTO.setPrice(
+                    orderItem.getPrice()
+            );
+
+            itemDTO.setQuantity(
+                    orderItem.getQuantity()
+            );
 
             items.add(itemDTO);
         }

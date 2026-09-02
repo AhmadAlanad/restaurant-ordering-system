@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   Text,
-  View,
+  View
 } from 'react-native';
 
 import api from '@/services/api';
@@ -14,6 +15,7 @@ import { styles } from '@/styles/order-details.styles';
 
 type OrderItem = {
   itemName: string;
+  imageUrl?: string;
   optionName?: string;
   optionId?: string;
   quantity: number;
@@ -357,6 +359,16 @@ export default function OrderDetailsScreen() {
               }
               style={styles.itemRow}
             >
+              {item.imageUrl ? (
+                <Image
+                  source={{
+                    uri: `http://localhost:8081/images/${item.imageUrl}`,
+                  }}
+                  style={styles.itemImage}
+                  resizeMode="cover"
+                />
+              ) : null}
+
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>
                   {item.itemName}

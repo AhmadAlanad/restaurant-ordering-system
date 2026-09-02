@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
+  Image,
   Pressable,
   Text,
   View
@@ -19,6 +20,7 @@ type CartItem = {
   optionId?: string | null;
   optionName?: string | null;
   optionPrice?: number;
+  imageUrl?: string;
 };
 
 export default function CartScreen() {
@@ -103,11 +105,15 @@ export default function CartScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Pressable
-          onPress={() => router.replace('/home')}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/home');
+            }
+          }}
         >
-          <Text style={styles.back}>
-            ← Back
-          </Text>
+          <Text style={styles.back}>← Home</Text>
         </Pressable>
 
         <Text style={styles.title}>
@@ -139,6 +145,15 @@ export default function CartScreen() {
             }
             renderItem={({ item }) => (
               <View style={styles.cartItem}>
+                {item.imageUrl ? (
+                  <Image
+                    source={{
+                      uri: `http://localhost:8081/images/${item.imageUrl}`,
+                    }}
+                    style={styles.itemImage}
+                    resizeMode="cover"
+                  />
+                ) : null}
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>
                     {item.name}

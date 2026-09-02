@@ -158,4 +158,11 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+
+  itemImage: {
+  width: 70,
+  height: 70,
+  borderRadius: 10,
+  marginRight: 12,
+},
 });
