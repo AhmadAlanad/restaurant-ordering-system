@@ -8,10 +8,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.restaurant.entity.Notification;
 
 public interface NotificationRepository
-        extends JpaRepository<Notification, UUID> {
+                extends JpaRepository<Notification, UUID> {
 
-    List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
+        List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
-    List<Notification> findByUserIdAndIsReadFalseOrderByCreatedAtDesc(
-            UUID userId);
+        List<Notification> findByUserIdAndIsReadFalseOrderByCreatedAtDesc(
+                        UUID userId);
+
+        boolean existsByUserIdAndOrderIdAndType(
+                        UUID userId,
+                        UUID orderId,
+                        String type);
 }

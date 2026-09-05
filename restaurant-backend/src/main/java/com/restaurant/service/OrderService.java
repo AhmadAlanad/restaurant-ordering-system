@@ -27,424 +27,378 @@ import com.restaurant.entity.Notification;
 import com.restaurant.enums.Role;
 import com.restaurant.repository.NotificationRepository;
 import com.restaurant.exception.RestaurantClosedException;
+import com.restaurant.service.WebSocketNotificationService;
 
 @Service
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+        @Autowired
+        private OrderRepository orderRepository;
 
-    @Autowired
-    private MenuItemRepository menuItemRepository;
+        @Autowired
+        private MenuItemRepository menuItemRepository;
 
-    @Autowired
-    private MenuItemOptionRepository optionRepository;
+        @Autowired
+        private MenuItemOptionRepository optionRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private NotificationRepository notificationRepository;
-    
-    @Autowired
-    private RestaurantSettingsService restaurantSettingsService;
+        @Autowired
+        private UserRepository userRepository;
 
+        @Autowired
+        private NotificationRepository notificationRepository;
 
-    public Order placeOrder(OrderRequestDTO request) {
+        @Autowired
+        private RestaurantSettingsService restaurantSettingsService;
 
-        User user = getAuthenticatedUser();
+        @Autowired
+        private WebSocketNotificationService webSocketNotificationService;
 
-        if (!restaurantSettingsService.isOpen()) {
-            throw new RestaurantClosedException(
-                    "Restaurant is currently closed"
-            );
+        public Order placeOrder(OrderRequestDTO request) {
+
+                User user = getAuthenticatedUser();
+
+                if (!restaurantSettingsService.isOpen()) {
+                        throw new RestaurantClosedException(
+                                        "Restaurant is currently closed");
+                }
+
+                Order order = new Order();
+
+                order.setUser(user);
+                order.setCustomerName(user.getFullName());
+                order.setCustomerPhone(user.getPhone());
+
+                order.setLatitude(request.getLatitude());
+                order.setLongitude(request.getLongitude());
+
+                order.setAddressLabel(
+                                request.getAddressLabel());
+                order.setAddressDescription(
+                                request.getAddressDescription());
+
+                order.setCustomerNote(
+                                request.getCustomerNote());
+
+                order.setPaymentMethod(
+                                request.getPaymentMethod());
+
+                order.setStatus(OrderStatus.PENDING);
+
+                order.setOrderDate(LocalDateTime.now());
+
+                List<OrderItem> orderItems = new ArrayList<>();
+
+                double totalPrice = 0;
+
+                for (var itemRequest : request.getItems()) {
+
+                        MenuItem menuItem = menuItemRepository.findById(
+                                        itemRequest.getMenuItemId())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Menu item not found"));
+
+                        if (!menuItem.isAvailable()) {
+                                throw new IllegalArgumentException(
+                                                "Menu item '" + menuItem.getName()
+                                                                + "' is no longer available");
+                        }
+
+                        MenuItemOption option = null;
+                        double itemPrice;
+
+                        if (itemRequest.getOptionId() != null) {
+
+                                option = optionRepository.findById(
+                                                itemRequest.getOptionId())
+                                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                                "Option not found"));
+
+                                // Make sure the selected option is still available.
+                                if (!option.isAvailable()) {
+                                        throw new IllegalArgumentException(
+                                                        "Selected option '" + option.getName()
+                                                                        + "' is no longer available");
+                                }
+
+                                // Make sure the selected option
+                                // belongs to the selected menu item.
+                                if (!option.getMenuItem().getId()
+                                                .equals(menuItem.getId())) {
+
+                                        throw new IllegalArgumentException(
+                                                        "Selected option does not belong to this menu item");
+                                }
+
+                                // Use option price
+                                itemPrice = option.getPrice();
+
+                        } else {
+
+                                // Menu item has no option.
+                                // Use the menu item's normal price.
+                                itemPrice = menuItem.getPrice();
+                        }
+
+                        OrderItem orderItem = new OrderItem();
+
+                        orderItem.setMenuItem(menuItem);
+
+                        orderItem.setOption(option);
+
+                        orderItem.setQuantity(
+                                        itemRequest.getQuantity());
+
+                        orderItem.setPrice(itemPrice);
+
+                        orderItem.setOrder(order);
+
+                        totalPrice += itemPrice *
+                                        itemRequest.getQuantity();
+
+                        orderItems.add(orderItem);
+                }
+
+                order.setOrderItems(orderItems);
+                order.setTotalPrice(totalPrice);
+
+                Order savedOrder = orderRepository.save(order);
+
+                List<User> admins = userRepository.findByRole(Role.ADMIN);
+
+                for (User admin : admins) {
+
+                        Notification notification = new Notification();
+
+                        notification.setUser(admin);
+
+                        notification.setOrderId(savedOrder.getId());
+
+                        notification.setMessage(
+                                        "New order #" +
+                                                        savedOrder.getId().toString().substring(0, 8) +
+                                                        " received from " +
+                                                        savedOrder.getCustomerName());
+
+                        notification.setType("NEW_ORDER");
+
+                        notification.setRead(false);
+
+                        notification.setCreatedAt(LocalDateTime.now());
+
+                        notificationRepository.save(notification);
+
+                        webSocketNotificationService.sendNewOrderNotification(
+                                        notification);
+                }
+
+                return savedOrder;
         }
 
-        Order order = new Order();
+        public Order getOrderById(UUID id) {
 
-        order.setUser(user);
-        order.setCustomerName(user.getFullName());
-        order.setCustomerPhone(user.getPhone());
+                User authenticatedUser = getAuthenticatedUser();
 
-        order.setLatitude(request.getLatitude());
-        order.setLongitude(request.getLongitude());
-        
-        
-        order.setAddressLabel(
-                request.getAddressLabel()
-        );
-        order.setAddressDescription(
-                request.getAddressDescription()
-        );
+                Order order = findOrderById(id);
 
-        order.setCustomerNote(
-                request.getCustomerNote()
-        );
+                if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
+                                && !order.getUser().getId().equals(authenticatedUser.getId())) {
 
-        order.setPaymentMethod(
-                request.getPaymentMethod()
-        );
+                        throw new AccessDeniedException(
+                                        "You cannot access another user's order");
+                }
 
-        order.setStatus(OrderStatus.PENDING);
-
-        order.setOrderDate(LocalDateTime.now());
-
-
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        double totalPrice = 0;
-
-
-        for (var itemRequest : request.getItems()) {
-
-            MenuItem menuItem =
-                    menuItemRepository.findById(
-                            itemRequest.getMenuItemId()
-                    )
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "Menu item not found"
-                            )
-                    );
-            
-            if (!menuItem.isAvailable()) {
-                throw new IllegalArgumentException(
-                        "Menu item '" + menuItem.getName()
-                        + "' is no longer available"
-                );
-            }
-
-
-            MenuItemOption option = null;
-            double itemPrice;
-
-            if (itemRequest.getOptionId() != null) {
-
-            	
-            	option = optionRepository.findById(
-            	        itemRequest.getOptionId()
-            	)
-            	.orElseThrow(() ->
-            	        new ResourceNotFoundException(
-            	                "Option not found"
-            	        )
-            	);
-
-            	// Make sure the selected option is still available.
-            	if (!option.isAvailable()) {
-            	    throw new IllegalArgumentException(
-            	            "Selected option '" + option.getName()
-            	            + "' is no longer available"
-            	    );
-            	}
-
-            	// Make sure the selected option
-            	// belongs to the selected menu item.
-            	if (!option.getMenuItem().getId()
-            	        .equals(menuItem.getId())) {
-
-            	    throw new IllegalArgumentException(
-            	            "Selected option does not belong to this menu item"
-            	    );
-            	}
-
-            	// Use option price
-            	itemPrice = option.getPrice();
-            	
-
-            } else {
-
-                // Menu item has no option.
-                // Use the menu item's normal price.
-                itemPrice = menuItem.getPrice();
-            }
-
-
-            OrderItem orderItem = new OrderItem();
-
-            orderItem.setMenuItem(menuItem);
-
-            orderItem.setOption(option);
-
-            orderItem.setQuantity(
-                    itemRequest.getQuantity()
-            );
-
-            orderItem.setPrice(itemPrice);
-
-            orderItem.setOrder(order);
-
-
-            totalPrice +=
-                    itemPrice *
-                    itemRequest.getQuantity();
-
-
-            orderItems.add(orderItem);
+                return order;
         }
 
+        public List<Order> getAllOrders() {
 
-        order.setOrderItems(orderItems);
-        order.setTotalPrice(totalPrice);
+                User authenticatedUser = getAuthenticatedUser();
 
+                if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN) {
 
-        Order savedOrder = orderRepository.save(order);
+                        throw new AccessDeniedException(
+                                        "Only administrators can view all orders");
+                }
 
-        List<User> admins = userRepository.findByRole(Role.ADMIN);
-
-        for (User admin : admins) {
-
-            Notification notification = new Notification();
-
-            notification.setUser(admin);
-
-            notification.setMessage(
-            	    "New order #" + savedOrder.getId().toString().substring(0, 8)
-            	    + " received from "
-            	    + savedOrder.getCustomerName()
-            	);
-
-            notification.setType("NEW_ORDER");
-
-            notification.setRead(false);
-
-            notification.setCreatedAt(LocalDateTime.now());
-
-            notificationRepository.save(notification);
+                return orderRepository.findAllByOrderByOrderDateDesc();
         }
 
-        return savedOrder;
-    }
+        public List<Order> getOrdersByUser(UUID userId) {
 
+                User authenticatedUser = getAuthenticatedUser();
 
-    public Order getOrderById(UUID id) {
+                if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
+                                && !authenticatedUser.getId().equals(userId)) {
 
-        User authenticatedUser = getAuthenticatedUser();
+                        throw new AccessDeniedException(
+                                        "You cannot access another user's orders");
+                }
 
-        Order order = findOrderById(id);
-
-        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
-                && !order.getUser().getId().equals(authenticatedUser.getId())) {
-
-            throw new AccessDeniedException(
-                    "You cannot access another user's order");
+                return orderRepository.findByUserIdOrderByOrderDateDesc(userId);
         }
 
-        return order;
-    }
+        public Order acceptOrder(UUID id) {
 
+                Order order = findOrderById(id);
 
-    public List<Order> getAllOrders() {
+                if (order.getStatus() == OrderStatus.ACCEPTED) {
+                        return order;
+                }
 
-        User authenticatedUser = getAuthenticatedUser();
+                if (order.getStatus() != OrderStatus.PENDING) {
+                        throw new IllegalStateException(
+                                        "Order must be PENDING before it can be accepted");
+                }
 
-        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN) {
+                order.setStatus(OrderStatus.ACCEPTED);
+                order.setAcceptedAt(LocalDateTime.now());
 
-            throw new AccessDeniedException(
-                    "Only administrators can view all orders");
+                Order savedOrder = orderRepository.save(order);
+
+                createOrderStatusNotification(
+                                savedOrder,
+                                "Your order #" + savedOrder.getId().toString().substring(0, 8)
+                                                + " has been accepted.");
+
+                return savedOrder;
         }
 
-        return orderRepository.findAllByOrderByOrderDateDesc();
-    }
+        public Order rejectOrder(
+                        UUID id,
+                        RejectOrderDTO rejectRequest) {
 
+                Order order = findOrderById(id);
 
-    public List<Order> getOrdersByUser(UUID userId) {
+                if (order.getStatus() == OrderStatus.REJECTED) {
+                        return order;
+                }
 
-        User authenticatedUser = getAuthenticatedUser();
+                if (order.getStatus() != OrderStatus.PENDING) {
+                        throw new IllegalStateException(
+                                        "Order must be PENDING before it can be rejected");
+                }
 
-        if (authenticatedUser.getRole() != com.restaurant.enums.Role.ADMIN
-                && !authenticatedUser.getId().equals(userId)) {
+                order.setStatus(OrderStatus.REJECTED);
+                order.setRejectionReason(rejectRequest.getReason());
+                order.setRejectedAt(LocalDateTime.now());
 
-            throw new AccessDeniedException(
-                    "You cannot access another user's orders");
+                Order savedOrder = orderRepository.save(order);
+
+                createOrderStatusNotification(
+                                savedOrder,
+                                "Your order #" + savedOrder.getId().toString().substring(0, 8)
+                                                + " has been rejected. Reason: "
+                                                + savedOrder.getRejectionReason());
+
+                return savedOrder;
         }
 
-        return orderRepository.findByUserIdOrderByOrderDateDesc(userId);
-    }
+        public Order preparingOrder(UUID id) {
 
+                Order order = findOrderById(id);
 
-    public Order acceptOrder(UUID id) {
+                if (order.getStatus() == OrderStatus.PREPARING) {
+                        return order;
+                }
 
-        Order order = findOrderById(id);
+                if (order.getStatus() != OrderStatus.ACCEPTED) {
+                        throw new IllegalStateException(
+                                        "Order must be ACCEPTED before it can be marked as PREPARING");
+                }
 
-        if (order.getStatus() == OrderStatus.ACCEPTED) {
-            return order;
+                order.setStatus(OrderStatus.PREPARING);
+
+                Order savedOrder = orderRepository.save(order);
+
+                createOrderStatusNotification(
+                                savedOrder,
+                                "Your order #" + savedOrder.getId().toString().substring(0, 8)
+                                                + " is being prepared.");
+
+                return savedOrder;
         }
 
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Order must be PENDING before it can be accepted"
-            );
+        public Order readyOrder(UUID id) {
+
+                Order order = findOrderById(id);
+
+                if (order.getStatus() == OrderStatus.READY) {
+                        return order;
+                }
+
+                if (order.getStatus() != OrderStatus.PREPARING) {
+                        throw new IllegalStateException(
+                                        "Order must be PREPARING before it can be marked as READY");
+                }
+
+                order.setStatus(OrderStatus.READY);
+
+                Order savedOrder = orderRepository.save(order);
+
+                createOrderStatusNotification(
+                                savedOrder,
+                                "Your order #" + savedOrder.getId().toString().substring(0, 8)
+                                                + " is ready for pickup/delivery.");
+
+                return savedOrder;
         }
 
-        order.setStatus(OrderStatus.ACCEPTED);
+        public Order deliveredOrder(UUID id) {
 
-        Order savedOrder = orderRepository.save(order);
+                Order order = findOrderById(id);
 
-        createOrderStatusNotification(
-                savedOrder,
-                "Your order #" + savedOrder.getId().toString().substring(0, 8)
-                + " has been accepted."
-        );
+                if (order.getStatus() == OrderStatus.DELIVERED) {
+                        return order;
+                }
 
-        return savedOrder;
-    }
+                if (order.getStatus() != OrderStatus.READY) {
+                        throw new IllegalStateException(
+                                        "Order must be READY before it can be marked as DELIVERED");
+                }
 
+                order.setStatus(OrderStatus.DELIVERED);
 
-    public Order rejectOrder(
-            UUID id,
-            RejectOrderDTO rejectRequest) {
+                Order savedOrder = orderRepository.save(order);
 
-        Order order = findOrderById(id);
+                createOrderStatusNotification(
+                                savedOrder,
+                                "Your order #" + savedOrder.getId().toString().substring(0, 8)
+                                                + " has been delivered.");
 
-        if (order.getStatus() == OrderStatus.REJECTED) {
-            return order;
+                return savedOrder;
         }
 
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Order must be PENDING before it can be rejected"
-            );
+        private User getAuthenticatedUser() {
+
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+                String email = authentication.getName();
+
+                return userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Authenticated user not found"));
         }
 
-        order.setStatus(OrderStatus.REJECTED);
+        private Order findOrderById(UUID id) {
 
-        order.setRejectionReason(
-                rejectRequest.getReason()
-        );
-
-        Order savedOrder = orderRepository.save(order);
-
-        createOrderStatusNotification(
-                savedOrder,
-                "Your order #" + savedOrder.getId().toString().substring(0, 8)
-                + " has been rejected. Reason: "
-                + savedOrder.getRejectionReason()
-        );
-
-        return savedOrder;
-    }
-
-
-    public Order preparingOrder(UUID id) {
-
-        Order order = findOrderById(id);
-
-        if (order.getStatus() == OrderStatus.PREPARING) {
-            return order;
+                return orderRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Order not found"));
         }
 
-        if (order.getStatus() != OrderStatus.ACCEPTED) {
-            throw new IllegalStateException(
-                    "Order must be ACCEPTED before it can be marked as PREPARING"
-            );
+        private void createOrderStatusNotification(
+                        Order order,
+                        String message) {
+
+                Notification notification = new Notification();
+
+                notification.setUser(order.getUser());
+                notification.setOrderId(order.getId());
+                notification.setMessage(message);
+                notification.setType("ORDER_STATUS");
+                notification.setRead(false);
+                notification.setCreatedAt(LocalDateTime.now());
+
+                notificationRepository.save(notification);
         }
-
-        order.setStatus(OrderStatus.PREPARING);
-
-        Order savedOrder = orderRepository.save(order);
-
-        createOrderStatusNotification(
-                savedOrder,
-                "Your order #" + savedOrder.getId().toString().substring(0, 8)
-                + " is being prepared."
-        );
-
-        return savedOrder;
-    }
-
-
-    public Order readyOrder(UUID id) {
-
-        Order order = findOrderById(id);
-
-        if (order.getStatus() == OrderStatus.READY) {
-            return order;
-        }
-
-        if (order.getStatus() != OrderStatus.PREPARING) {
-            throw new IllegalStateException(
-                    "Order must be PREPARING before it can be marked as READY"
-            );
-        }
-
-        order.setStatus(OrderStatus.READY);
-
-        Order savedOrder = orderRepository.save(order);
-
-        createOrderStatusNotification(
-                savedOrder,
-                "Your order #" + savedOrder.getId().toString().substring(0, 8)
-                + " is ready for pickup/delivery."
-        );
-
-        return savedOrder;
-    }
-
-
-    public Order deliveredOrder(UUID id) {
-
-        Order order = findOrderById(id);
-
-        if (order.getStatus() == OrderStatus.DELIVERED) {
-            return order;
-        }
-
-        if (order.getStatus() != OrderStatus.READY) {
-            throw new IllegalStateException(
-                    "Order must be READY before it can be marked as DELIVERED"
-            );
-        }
-
-        order.setStatus(OrderStatus.DELIVERED);
-
-        Order savedOrder = orderRepository.save(order);
-
-        createOrderStatusNotification(
-                savedOrder,
-                "Your order #" + savedOrder.getId().toString().substring(0, 8)
-                + " has been delivered."
-        );
-
-        return savedOrder;
-    }
-    
-    private User getAuthenticatedUser() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Authenticated user not found"));
-    }
-
-
-    private Order findOrderById(UUID id) {
-
-        return orderRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Order not found"
-                        )
-                );
-    }
-    
-    private void createOrderStatusNotification(
-            Order order,
-            String message) {
-
-        Notification notification = new Notification();
-
-        notification.setUser(order.getUser());
-        notification.setMessage(message);
-        notification.setType("ORDER_STATUS");
-        notification.setRead(false);
-        notification.setCreatedAt(LocalDateTime.now());
-
-        notificationRepository.save(notification);
-    }
 }

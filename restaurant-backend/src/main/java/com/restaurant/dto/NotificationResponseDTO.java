@@ -8,6 +8,7 @@ public class NotificationResponseDTO {
 	private UUID id;
     private String message;
     private String type;
+    private UUID orderId;
     private boolean read;
     private LocalDateTime createdAt;
 
@@ -36,6 +37,14 @@ public class NotificationResponseDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+    
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
     }
 
     public boolean isRead() {

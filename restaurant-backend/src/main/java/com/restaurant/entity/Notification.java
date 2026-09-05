@@ -15,6 +15,9 @@ public class Notification {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    
+    @Column(name = "order_id")
+    private UUID orderId;
 
     @Column(nullable = false)
     private String message;
@@ -46,6 +49,14 @@ public class Notification {
 
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(UUID orderId) {
+        this.orderId = orderId;
     }
 
 

@@ -13,3 +13,7 @@ export const getUnreadNotifications = async () => {
 export const markNotificationAsRead = async (id) => {
     await api.put(`/notifications/${id}/read`);
 };
+
+export async function markAllNotificationsAsRead() {
+    await api.put("/notifications/read-all");
+}

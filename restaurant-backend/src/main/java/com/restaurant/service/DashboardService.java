@@ -1,12 +1,12 @@
 package com.restaurant.service;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
+
 import com.restaurant.dto.DashboardDTO;
-import com.restaurant.entity.Order;
 import com.restaurant.enums.OrderStatus;
 import com.restaurant.repository.OrderRepository;
 
@@ -15,47 +15,71 @@ public class DashboardService {
 
     @Autowired
     private OrderRepository orderRepository;
-    
-       
+
+
     public DashboardDTO getDashboard() {
 
         DashboardDTO dashboard = new DashboardDTO();
 
-        dashboard.setTotalOrders(orderRepository.count());
 
-        dashboard.setPendingOrders(
-                orderRepository.countByStatus(OrderStatus.PENDING));
-
-        
-        List<Order> acceptedOrders =
-                orderRepository.findByStatus(OrderStatus.ACCEPTED);
-        
-        
+        // Start and end of the current day
 
         LocalDate today = LocalDate.now();
-        long todayOrders = 0;
 
-        for (Order order : acceptedOrders) {
+        LocalDateTime startOfDay =
+                today.atStartOfDay();
 
-            if (order.getOrderDate() != null &&
-                order.getOrderDate().toLocalDate().equals(today)) {
+        LocalDateTime endOfDay =
+                today.plusDays(1).atStartOfDay();
 
-                
-                
-                if (order.getOrderDate() != null &&
-                	    order.getOrderDate().toLocalDate().equals(today)) {
 
-                	    todayOrders++;
+        // Pending orders created today
 
-                	}
+        long pendingOrders =
+                orderRepository.countByStatusAndOrderDateBetween(
+                        OrderStatus.PENDING,
+                        startOfDay,
+                        endOfDay
+                );
 
-            }
 
-        }
-        
-      
-        
+        // Orders accepted today
+
+        // This count does NOT depend on the current status.
+
+        long acceptedOrders =
+                orderRepository.countByAcceptedAtBetween(
+                        startOfDay,
+                        endOfDay
+                );
+
+
+        // Orders rejected today
+
+        long rejectedOrders =
+                orderRepository.countByRejectedAtBetween(
+                        startOfDay,
+                        endOfDay
+                );
+
+
+        // All orders created today
+
+        long todayOrders =
+                orderRepository.countByOrderDateBetween(
+                        startOfDay,
+                        endOfDay
+                );
+
+
+        dashboard.setPendingOrders(pendingOrders);
+
+        dashboard.setAcceptedOrders(acceptedOrders);
+
+        dashboard.setRejectedOrders(rejectedOrders);
+
         dashboard.setTodayOrders(todayOrders);
+
 
         return dashboard;
     }

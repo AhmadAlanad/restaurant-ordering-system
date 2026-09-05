@@ -14,5 +14,27 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 	List<Order> findByUserIdOrderByOrderDateDesc(UUID userId);
 
 	List<Order> findAllByOrderByOrderDateDesc();
+	
+	
+	long countByStatusAndOrderDateBetween(
+	        OrderStatus status,
+	        java.time.LocalDateTime start,
+	        java.time.LocalDateTime end
+	);
+
+	long countByOrderDateBetween(
+	        java.time.LocalDateTime start,
+	        java.time.LocalDateTime end
+	);
+	
+	long countByAcceptedAtBetween(
+			java.time.LocalDateTime start,
+			java.time.LocalDateTime end
+	);
+
+	long countByRejectedAtBetween(
+			java.time.LocalDateTime start,
+			java.time.LocalDateTime end
+	);
 
 }

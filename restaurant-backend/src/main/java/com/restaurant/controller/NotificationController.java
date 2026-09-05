@@ -36,4 +36,9 @@ public class NotificationController {
 
         notificationService.markAsRead(id);
     }
+    
+    @PutMapping("/read-all")
+    public void markAllAsRead() {
+        notificationService.markAllAsRead();
+    }
 }

@@ -1,281 +1,388 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/dashboard.css";
 
 function Dashboard() {
 
-    const [orders, setOrders] = useState([]);
-	const notificationAudio = useRef(null);
-    const navigate = useNavigate();
-    const [showOrderModal, setShowOrderModal] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState(null);
+	const [orders, setOrders] = useState([]);
 
-    const [dashboard, setDashboard] = useState({
-    totalOrders: 0,
-    pendingOrders: 0,
-    });
-	
-	
-	
+	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [showOrderModal, setShowOrderModal] = useState(false);
+	const [selectedOrder, setSelectedOrder] = useState(null);
+	const [restaurantStatus, setRestaurantStatus] = useState(null);
+	const [dashboard, setDashboard] = useState({
+		totalOrders: 0,
+		pendingOrders: 0,
+	});
+
+
+
 	const loadDashboard = async () => {
 
-	    try {
+		try {
 
-	        const response = await api.get("/dashboard");
+			const response = await api.get("/dashboard");
 
-	        console.log("Dashboard:", response.data);
+			setDashboard(response.data);
 
-	        setDashboard(response.data);
+		} catch (error) {
 
-	    } catch (error) {
+			console.error(error);
 
-	        console.error(error);
-
-	    }
+		}
 
 	};
 
 	const loadOrders = async () => {
 
-	    try {
+		try {
 
-	        const response = await api.get("/orders");
+			const response = await api.get("/orders");
 
-	        const updatedOrders = response.data;
+			const updatedOrders = response.data;
 
-	        setOrders(updatedOrders);
+			setOrders(updatedOrders);
 
-	        const hasPendingOrders =
-	            updatedOrders.some(
-	                (order) => order.status === "PENDING"
-	            );
 
-	        if (hasPendingOrders) {
 
-	            notificationAudio.current?.play()
-	                .catch((error) => {
-	                    console.log(
-	                        "Notification sound could not play:",
-	                        error
-	                    );
-	                });
+		} catch (error) {
 
-	        } else {
+			console.error(error);
 
-	            notificationAudio.current?.pause();
-
-	            if (notificationAudio.current) {
-	                notificationAudio.current.currentTime = 0;
-	            }
-
-	        }
-
-	    } catch (error) {
-
-	        console.error(error);
-
-	    }
+		}
 
 	};
-	
+
+	const loadRestaurantStatus = async () => {
+
+		try {
+
+			const response = await api.get("/restaurant/status");
+
+			setRestaurantStatus(response.data);
+
+		} catch (error) {
+
+			console.error(
+				"Failed to load restaurant status:",
+				error
+			);
+
+		}
+
+	};
+
+
+
 	useEffect(() => {
-		    notificationAudio.current = new Audio(
-		        "/sounds/new-order.mp3"
-		    );
 
-		    notificationAudio.current.loop = true;
+		loadOrders();
 
-		    return () => {
-		        notificationAudio.current.pause();
-		        notificationAudio.current = null;
-		    };
-		}, []);
+		loadDashboard();
 
-		useEffect(() => {
+		loadRestaurantStatus();
 
-		    loadOrders();
+		const interval = setInterval(() => {
 
-		    loadDashboard();
+			loadOrders();
 
-		    const interval = setInterval(() => {
+			loadDashboard();
 
-		        loadOrders();
+			loadRestaurantStatus();
 
-		        loadDashboard();
+		}, 5000);
 
-		    }, 5000);
+		return () => clearInterval(interval);
 
-		    return () => clearInterval(interval);
+	}, []);
 
-		}, []);
-		
-		useEffect(() => {
+	useEffect(() => {
 
-		    if (showOrderModal) {
+		if (showOrderModal) {
 
-		        document.body.style.overflow = "hidden";
+			document.body.style.overflow = "hidden";
 
-		    } else {
+		} else {
 
-		        document.body.style.overflow = "auto";
+			document.body.style.overflow = "auto";
 
-		    }
+		}
 
-		    return () => {
+		return () => {
 
-		        document.body.style.overflow = "auto";
+			document.body.style.overflow = "auto";
 
-		    };
+		};
 
-		}, [showOrderModal]);
+	}, [showOrderModal]);
 
 
-const refreshSelectedOrder = async (id) => {
+	const refreshSelectedOrder = async (id) => {
 
-    try {
+		try {
 
-        const response = await api.get(`/orders/${id}`);
+			const response = await api.get(`/orders/${id}`);
 
-        setSelectedOrder(response.data);
+			setSelectedOrder(response.data);
 
-        loadOrders();
-        loadDashboard();
+			loadOrders();
+			loadDashboard();
 
-    } catch (error) {
+		} catch (error) {
 
-        console.error(error);
+			console.error(error);
 
-    }
+		}
 
-};
+	};
 
-const openOrderDetails = (order) => {
+	const openOrderDetails = (order) => {
 
-    console.log(order);
+		setSelectedOrder(order);
 
-    setSelectedOrder(order);
+		setShowOrderModal(true);
 
-    setShowOrderModal(true);
+	};
 
-};
+
+
+	useEffect(() => {
+
+		const orderId = searchParams.get("orderId");
+
+		if (!orderId || orders.length === 0) {
+
+			return;
+
+		}
+
+		const selectedOrderFromUrl = orders.find(
+
+			order => order.id === orderId
+
+		);
+
+		if (selectedOrderFromUrl) {
+
+			openOrderDetails(selectedOrderFromUrl);
+
+			// Remove orderId from URL after opening
+
+			setSearchParams({});
+
+		}
+
+	}, [orders, searchParams]);
+
+
 
 	const acceptOrder = async (id) => {
 
-    try {
+		try {
 
-        await api.put(`/orders/${id}/accept`);
+			await api.put(`/orders/${id}/accept`);
 
-        await refreshSelectedOrder(id);
+			await refreshSelectedOrder(id);
 
-    } catch (error) {
+			window.dispatchEvent(
 
-        console.error(error);
+				new CustomEvent(
 
-        alert("Failed to accept order.");
+					"orderStatusChanged",
 
-    }
+					{
 
-};
+						detail: {
+
+							orderId: id,
+
+							status: "ACCEPTED"
+
+						}
+
+					}
+
+				)
+
+			);
+
+		} catch (error) {
+
+			console.error(error);
+
+			alert("Failed to accept order.");
+
+		}
+
+	};
 
 	const rejectOrder = async (id) => {
 
-    const reason = prompt("Enter rejection reason:");
+		const reason = prompt("Enter rejection reason:");
 
-    if (!reason) return;
+		if (!reason) return;
 
-    try {
+		try {
 
-        await api.put(`/orders/${id}/reject`, {
-            reason: reason
-        });
+			await api.put(`/orders/${id}/reject`, {
+				reason: reason
+			});
 
-        await refreshSelectedOrder(id);
+			await refreshSelectedOrder(id);
 
-    } catch (error) {
+			window.dispatchEvent(
 
-        console.error(error);
+				new CustomEvent(
 
-        alert("Failed to reject order.");
+					"orderStatusChanged",
 
-    }
+					{
+						detail: {
+							orderId: id,
+							status: "REJECTED"
+						}
+					}
 
-};
+				)
 
-const preparingOrder = async (id) => {
+			);
 
-    try {
+		} catch (error) {
 
-        await api.put(`/orders/${id}/preparing`);
+			console.error(error);
 
-        await refreshSelectedOrder(id);
+			alert("Failed to reject order.");
 
-    } catch (error) {
+		}
 
-        console.error(error);
+	};
 
-        alert("Failed to update order.");
+	const preparingOrder = async (id) => {
 
-    }
+		try {
 
-};
+			await api.put(`/orders/${id}/preparing`);
 
-const readyOrder = async (id) => {
+			await refreshSelectedOrder(id);
 
-    try {
+			window.dispatchEvent(
 
-        await api.put(`/orders/${id}/ready`);
+				new CustomEvent(
 
-        await refreshSelectedOrder(id);
+					"orderStatusChanged",
 
-    } catch (error) {
+					{
+						detail: {
+							orderId: id,
+							status: "PREPARING"
+						}
+					}
 
-        console.error(error);
+				)
 
-        alert("Failed to update order.");
+			);
 
-    }
+		} catch (error) {
 
-};
+			console.error(error);
 
-const deliveredOrder = async (id) => {
+			alert("Failed to update order.");
 
-    try {
+		}
 
-        await api.put(`/orders/${id}/delivered`);
+	};
+	const readyOrder = async (id) => {
 
-        await refreshSelectedOrder(id);
+		try {
 
-    } catch (error) {
+			await api.put(`/orders/${id}/ready`);
 
-        console.error(error);
+			await refreshSelectedOrder(id);
 
-        alert("Failed to update order.");
+			window.dispatchEvent(
 
-    }
+				new CustomEvent(
 
-};
+					"orderStatusChanged",
 
-const printOrder = () => {
+					{
+						detail: {
+							orderId: id,
+							status: "READY"
+						}
+					}
 
-    const order = selectedOrder;
+				)
 
-    if (!order) {
-        return;
-    }
+			);
 
-    const printWindow = window.open(
-        "",
-        "_blank",
-        "width=800,height=900"
-    );
+		} catch (error) {
 
-    if (!printWindow) {
-        alert("Please allow pop-ups to print the order.");
-        return;
-    }
+			console.error(error);
 
-    const itemsHtml = order.items.map(item => `
+			alert("Failed to update order.");
+
+		}
+
+	};
+
+	const deliveredOrder = async (id) => {
+
+		try {
+
+			await api.put(`/orders/${id}/delivered`);
+
+			await refreshSelectedOrder(id);
+
+			window.dispatchEvent(
+
+				new CustomEvent(
+
+					"orderStatusChanged",
+
+					{
+						detail: {
+							orderId: id,
+							status: "DELIVERED"
+						}
+					}
+
+				)
+
+			);
+
+		} catch (error) {
+
+			console.error(error);
+
+			alert("Failed to update order.");
+
+		}
+
+	};
+
+	const printOrder = () => {
+
+		const order = selectedOrder;
+
+		if (!order) {
+			return;
+		}
+
+		const printWindow = window.open(
+			"",
+			"_blank",
+			"width=800,height=900"
+		);
+
+		if (!printWindow) {
+			alert("Please allow pop-ups to print the order.");
+			return;
+		}
+
+		const itemsHtml = order.items.map(item => `
         <tr>
             <td>${item.itemName}</td>
             <td style="text-align:center;">
@@ -290,7 +397,7 @@ const printOrder = () => {
         </tr>
     `).join("");
 
-    printWindow.document.write(`
+		printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -411,8 +518,8 @@ const printOrder = () => {
                 <p>
                     <strong>Payment Method:</strong>
                     ${order.paymentMethod === "CASH"
-                        ? "Cash"
-                        : "Credit Card"}
+				? "Cash"
+				: "Credit Card"}
                 </p>
 
                 <p>
@@ -445,27 +552,25 @@ const printOrder = () => {
                 Total: ${order.totalPrice} SR
             </div>
 
-            ${
-                order.customerNote
-                    ? `
+            ${order.customerNote
+				? `
                         <div class="note">
                             <strong>Customer Note:</strong>
                             <p>${order.customerNote}</p>
                         </div>
                     `
-                    : ""
-            }
+				: ""
+			}
 
-            ${
-                order.rejectionReason
-                    ? `
+            ${order.rejectionReason
+				? `
                         <div class="rejection">
                             <strong>Rejection Reason:</strong>
                             <p>${order.rejectionReason}</p>
                         </div>
                     `
-                    : ""
-            }
+				: ""
+			}
 
             <div class="footer">
                 Thank you for your order.
@@ -475,637 +580,687 @@ const printOrder = () => {
         </html>
     `);
 
-    printWindow.document.close();
+		printWindow.document.close();
 
-    printWindow.focus();
+		printWindow.focus();
 
-    printWindow.onload = () => {
+		printWindow.onload = () => {
 
-        printWindow.print();
+			printWindow.print();
 
-        printWindow.close();
+			printWindow.close();
 
-    };
-};
+		};
+	};
 
-		const getStatusBadge = (status) => {
+	const getStatusBadge = (status) => {
 
-    switch (status) {
+		switch (status) {
 
-        case "PENDING":
-            return "bg-warning";
+			case "PENDING":
+				return "bg-warning";
 
-        case "ACCEPTED":
-            return "bg-success";
+			case "ACCEPTED":
+				return "bg-success";
 
-        case "PREPARING":
-            return "bg-primary";
+			case "PREPARING":
+				return "bg-primary";
 
-        case "READY":
-            return "bg-info";
+			case "READY":
+				return "bg-info";
 
-        case "DELIVERED":
-            return "bg-dark";
+			case "DELIVERED":
+				return "bg-dark";
 
-        case "REJECTED":
-            return "bg-danger";
+			case "REJECTED":
+				return "bg-danger";
 
-        default:
-            return "bg-secondary";
-    }
-};
-return (
-    <div className="container-fluid dashboard-page">
+			default:
+				return "bg-secondary";
+		}
+	};
+	return (
+		<div className="container-fluid dashboard-page">
 
-        {/* =========================
+			{/* =========================
             Dashboard Header
         ========================= */}
 
-        <div className="dashboard-header">
+			<div className="dashboard-header">
 
-            <div>
-                <h1 className="dashboard-title">
-                    Admin Dashboard
-                </h1>
+				<div>
+					<h1 className="dashboard-title">
+						Admin Dashboard
+					</h1>
 
-                <p className="dashboard-subtitle">
-                    Manage orders and monitor your restaurant
-                </p>
-            </div>
+					<p className="dashboard-subtitle">
+						Manage orders and monitor your restaurant
+					</p>
+				</div>
 
-            <div className="d-flex gap-2">
+				<div className="d-flex gap-2">
 
-                <button
-                    className="btn btn-primary"
-                    onClick={() => navigate("/admin/menu")}
-                >
-                    🍽️ Manage Menu
-                </button>
+					<button
+						className="btn btn-primary"
+						onClick={() => navigate("/admin/menu")}
+					>
+						🍽️ Manage Menu
+					</button>
 
-                <button
-                    className="btn btn-success"
-                    onClick={() => navigate("/reports")}
-                >
-                    📊 Sales Reports
-                </button>
+					<button
+						className="btn btn-success"
+						onClick={() => navigate("/reports")}
+					>
+						📊 Sales Reports
+					</button>
 
-            </div>
+				</div>
 
-        </div>
+			</div>
 
 
-        {/* =========================
+			{/* =========================
             Statistics
         ========================= */}
 
-        <div className="row g-4">
 
-            <div className="col-md-6 col-lg-3">
+			<div className="row g-4">
 
-                <div className="card dashboard-stat-card">
 
-                    <div className="card-body">
+				{/* Orders Today */}
 
-                        <div className="dashboard-stat-label">
-                            Total Orders
-                        </div>
+				<div className="col-md-6 col-lg">
 
-                        <h2 className="dashboard-stat-number">
-                            {dashboard.totalOrders}
-                        </h2>
+					<div className="card dashboard-stat-card">
 
-                    </div>
+						<div className="card-body">
 
-                </div>
+							<div className="dashboard-stat-label">
+								Orders Today
+							</div>
 
-            </div>
+							<h2 className="dashboard-stat-number text-info">
+								{dashboard.todayOrders}
+							</h2>
 
-
-            <div className="col-md-6 col-lg-3">
-
-                <div className="card dashboard-stat-card">
-
-                    <div className="card-body">
-
-                        <div className="dashboard-stat-label">
-                            Pending Orders
-                        </div>
-
-                        <h2 className="dashboard-stat-number text-warning">
-                            {dashboard.pendingOrders}
-                        </h2>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div className="col-md-6 col-lg-3">
-
-                <div className="card dashboard-stat-card">
-
-                    <div className="card-body">
-
-                        <div className="dashboard-stat-label">
-                            Orders Today
-                        </div>
-
-                        <h2 className="dashboard-stat-number text-info">
-                            {dashboard.todayOrders}
-                        </h2>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div className="col-md-6 col-lg-3">
-
-                <div className="card dashboard-stat-card">
-
-                    <div className="card-body">
-
-                        <div className="dashboard-stat-label">
-                            Current Status
-                        </div>
-
-                        <h2 className="dashboard-stat-number text-success">
-                            Active
-                        </h2>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {/* =========================
-            Orders Section
-        ========================= */}
-
-        <div className="dashboard-orders-section">
-
-            <h2 className="dashboard-orders-title">
-                Recent Orders
-            </h2>
-
-
-			{orders.map(order => (
-			    <div
-			        key={order.id}
-			        className="card dashboard-order-card"
-			        onClick={() => openOrderDetails(order)}
-			    >
-			        <div className="card-body">
-
-			            <div
-			                className={`dashboard-order-header order-status-${order.status.toLowerCase()}`}
-			            >
-			                <div>
-			                    <h4>
-			                        Order #{order.id.substring(0, 8)}
-			                    </h4>
-
-			                    <small>
-			                        {new Date(order.orderDate).toLocaleString()}
-			                    </small>
-			                </div>
-
-			                <span
-			                    className={`badge ${getStatusBadge(order.status)}`}
-			                >
-			                    {order.status}
-			                </span>
-			            </div>
-
-			            <div className="dashboard-order-info">
-
-			                <div>
-			                    <span className="dashboard-order-label">
-			                        Customer
-			                    </span>
-
-			                    <strong>
-			                        👤 {order.customerName}
-			                    </strong>
-			                </div>
-
-			                <div>
-			                    <span className="dashboard-order-label">
-			                        Phone
-			                    </span>
-
-			                    <strong>
-			                        📞 {order.customerPhone}
-			                    </strong>
-			                </div>
-
-			                <div>
-			                    <span className="dashboard-order-label">
-			                        Total
-			                    </span>
-
-			                    <strong className="dashboard-order-price">
-			                        {order.totalPrice} SR
-			                    </strong>
-			                </div>
-
-			            </div>
-
-			        </div>
-			    </div>
-			))}
-</div>
-
-
-{showOrderModal && selectedOrder && (
-
-    <div className="modal fade show d-block dashboard-modal">
-
-        <div className="modal-dialog modal-lg modal-dialog-scrollable">
-
-            <div className="modal-content">
-
-                {/* Modal Header */}
-                <div className="modal-header">
-
-                    <div>
-					<div className="d-flex align-items-center gap-2">
-
-					    <h5 className="modal-title mb-0">
-
-					        Order #{selectedOrder.id.substring(0, 8)}
-
-					    </h5>
-
-					    <span
-					        className={`badge ${getStatusBadge(
-					            selectedOrder.status
-					        )}`}
-					    >
-					        {selectedOrder.status}
-					    </span>
+						</div>
 
 					</div>
 
-                        <small className="text-muted">
-                            {new Date(
-                                selectedOrder.orderDate
-                            ).toLocaleString()}
-                        </small>
-                    </div>
-
-                    <button
-                        type="button"
-                        className="btn-close"
-                        onClick={() => setShowOrderModal(false)}
-                    ></button>
-
-                </div>
+				</div>
 
 
-                {/* Modal Body */}
-                <div
-                    className="modal-body"
-                    id="print-order"
-                >
 
-				
 
-				{/* Customer / Delivery / Payment Information */}
 
-				<div className="dashboard-modal-compact-info">
+				{/* Accepted Orders */}
 
-				
-				<div>
+				<div className="col-md-6 col-lg">
 
-				    <span className="dashboard-modal-label">
-				        Customer
-				    </span>
+					<div className="card dashboard-stat-card">
 
-				    <strong>
-				        {selectedOrder.customerName}
-				    </strong>
+						<div className="card-body">
+
+							<div className="dashboard-stat-label">
+								Accepted Orders
+							</div>
+
+							<h2 className="dashboard-stat-number text-success">
+								{dashboard.acceptedOrders}
+							</h2>
+
+						</div>
+
+					</div>
 
 				</div>
 
 
-				<div>
+				{/* Rejected Orders */}
 
-				    <span className="dashboard-modal-label">
-				        Phone
-				    </span>
+				<div className="col-md-6 col-lg">
 
-				    <strong>
-				        {selectedOrder.customerPhone}
-				    </strong>
+					<div className="card dashboard-stat-card">
+
+						<div className="card-body">
+
+							<div className="dashboard-stat-label">
+								Rejected Orders
+							</div>
+
+							<h2 className="dashboard-stat-number text-danger">
+								{dashboard.rejectedOrders}
+							</h2>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				{/* Pending Orders */}
+
+				<div className="col-md-6 col-lg">
+
+					<div className="card dashboard-stat-card">
+
+						<div className="card-body">
+
+							<div className="dashboard-stat-label">
+								Pending Orders
+							</div>
+
+							<h2 className="dashboard-stat-number text-warning">
+								{dashboard.pendingOrders}
+							</h2>
+
+						</div>
+
+					</div>
 
 				</div>
 
 
-				<div>
-
-				    <span className="dashboard-modal-label">
-				        Payment
-				    </span>
-
-				    <strong>
-				        {selectedOrder.paymentMethod === "CASH"
-				            ? "💵 Cash"
-				            : "💳 Credit Card"}
-				    </strong>
-
-				</div>
 
 
-				<div>
 
-				    <span className="dashboard-modal-label">
-				        Address
-				    </span>
+				{/* Restaurant Status */}
 
-				    <strong>
-				        {selectedOrder.addressLabel}
-				    </strong>
+				<div className="col-md-6 col-lg">
 
-				</div>
+					<div className="card dashboard-stat-card">
 
+						<div className="card-body">
 
-				<div className="dashboard-modal-address-description">
+							<div className="dashboard-stat-label">
+								Restaurant Status
+							</div>
 
-				    <span className="dashboard-modal-label">
-				        Description
-				    </span>
+							<h2
+								className={`dashboard-stat-number ${restaurantStatus?.open
+									? "text-success"
+									: "text-danger"
+									}`}
+							>
 
-				    <strong>
-				        {selectedOrder.addressDescription}
-				    </strong>
+								{restaurantStatus === null
+									? "Loading..."
+									: restaurantStatus.open
+										? "Open"
+										: "Closed"}
 
-				</div>
-				
+							</h2>
+
+						</div>
+
+					</div>
 
 				</div>
 
-				{/* Customer Location */}
-				{selectedOrder.latitude !== null &&
-				selectedOrder.longitude !== null && (
+			</div>
 
-				
-				    <div className="dashboard-modal-location">
 
-				        <a
-				            href={`https://www.google.com/maps?q=${selectedOrder.latitude},${selectedOrder.longitude}`}
-				            target="_blank"
-				            rel="noopener noreferrer"
-				            className="btn btn-outline-primary"
-				        >
-				            📍 View Customer Location
-				        </a>
 
-				    </div>
+			{/* =========================
+            Orders Section
+        ========================= */}
 
-				)}
-				
+			<div className="dashboard-orders-section">
 
+				<h2 className="dashboard-orders-title">
+					Recent Orders
+				</h2>
 
-                    {/* Order Items */}
-                    <div className="dashboard-modal-section">
 
-                        <h6 className="dashboard-modal-section-title">
-                            🧾 Order Items
-                        </h6>
+				{orders.map(order => (
+					<div
+						key={order.id}
+						className="card dashboard-order-card"
+						onClick={() => openOrderDetails(order)}
+					>
+						<div className="card-body">
 
-                        <div className="dashboard-order-items">
+							<div
+								className={`dashboard-order-header order-status-${order.status.toLowerCase()}`}
+							>
+								<div>
+									<h4>
+										Order #{order.id.substring(0, 8)}
+									</h4>
 
-						
-						{selectedOrder.items.map((item, index) => (
+									<small>
+										{new Date(order.orderDate).toLocaleString()}
+									</small>
+								</div>
 
-						    <div
-						        key={index}
-						        className="dashboard-modal-item"
-						    >
+								<span
+									className={`badge ${getStatusBadge(order.status)}`}
+								>
+									{order.status}
+								</span>
+							</div>
 
-						        {/* Item Image */}
-						        {item.imageUrl ? (
+							<div className="dashboard-order-info">
 
-						            <img
-						                src={`http://localhost:8081/images/${item.imageUrl}`}
-						                alt={item.itemName}
-						                className="dashboard-modal-item-image"
-						            />
+								<div>
+									<span className="dashboard-order-label">
+										Customer
+									</span>
 
-						        ) : (
+									<strong>
+										👤 {order.customerName}
+									</strong>
+								</div>
 
-						            <div className="dashboard-modal-item-image-placeholder">
-						                🍽️
-						            </div>
+								<div>
+									<span className="dashboard-order-label">
+										Phone
+									</span>
 
-						        )}
+									<strong>
+										📞 {order.customerPhone}
+									</strong>
+								</div>
 
+								<div>
+									<span className="dashboard-order-label">
+										Total
+									</span>
 
-						        {/* Item Information */}
-						        <div className="dashboard-modal-item-details">
+									<strong className="dashboard-order-price">
+										{order.totalPrice} SR
+									</strong>
+								</div>
 
-						            <strong>
-						                {item.itemName}
-						            </strong>
+							</div>
 
-						            {item.optionName && (
-						                <small>
-						                    {item.optionName}
-						                </small>
-						            )}
+						</div>
+					</div>
+				))}
+			</div>
 
-						            <span>
-						                Quantity: {item.quantity}
-						            </span>
 
-						        </div>
+			{showOrderModal && selectedOrder && (
 
+				<div className="modal fade show d-block dashboard-modal">
 
-						        {/* Item Price */}
-						        <strong className="dashboard-order-price">
-						            {item.price * item.quantity} SR
-						        </strong>
+					<div className="modal-dialog modal-lg modal-dialog-scrollable">
 
-						    </div>
+						<div className="modal-content">
 
-						))}
-						
+							{/* Modal Header */}
+							<div className="modal-header">
 
-                        </div>
+								<div>
+									<div className="d-flex align-items-center gap-2">
 
+										<h5 className="modal-title mb-0">
 
-                        {/* Total */}
-                        <div className="dashboard-modal-total">
+											Order #{selectedOrder.id.substring(0, 8)}
 
-                            <span>
-                                Total
-                            </span>
+										</h5>
 
-                            <strong>
-                                {selectedOrder.totalPrice} SR
-                            </strong>
+										<span
+											className={`badge ${getStatusBadge(
+												selectedOrder.status
+											)}`}
+										>
+											{selectedOrder.status}
+										</span>
 
-                        </div>
+									</div>
 
-                    </div>
+									<small className="text-muted">
+										{new Date(
+											selectedOrder.orderDate
+										).toLocaleString()}
+									</small>
+								</div>
 
+								<button
+									type="button"
+									className="btn-close"
+									onClick={() => setShowOrderModal(false)}
+								></button>
 
-                    {/* Customer Note */}
-                    {selectedOrder.customerNote && (
+							</div>
 
-                        <div className="alert alert-warning dashboard-customer-note">
 
-                            <h5>
-                                📝 Customer Note
-                            </h5>
+							{/* Modal Body */}
+							<div
+								className="modal-body"
+								id="print-order"
+							>
 
-                            <p className="mb-0">
-                                {selectedOrder.customerNote}
-                            </p>
 
-                        </div>
 
-                    )}
+								{/* Customer / Delivery / Payment Information */}
 
+								<div className="dashboard-modal-compact-info">
 
-                    {/* Rejection Reason */}
-                    {selectedOrder.rejectionReason && (
 
-                        <div className="alert alert-danger dashboard-rejection-reason">
+									<div>
 
-                            <h5>
-                                ❌ Rejection Reason
-                            </h5>
+										<span className="dashboard-modal-label">
+											Customer
+										</span>
 
-                            <p className="mb-0">
-                                {selectedOrder.rejectionReason}
-                            </p>
+										<strong>
+											{selectedOrder.customerName}
+										</strong>
 
-                        </div>
+									</div>
 
-                    )}
 
-                </div>
+									<div>
 
+										<span className="dashboard-modal-label">
+											Phone
+										</span>
 
-                
-				{/* Modal Footer */}
-				<div className="modal-footer">
+										<strong>
+											{selectedOrder.customerPhone}
+										</strong>
 
-				    <div className="dashboard-status-actions">
+									</div>
 
-				        {/* Accept */}
-				        <button
-				            className="btn btn-success"
-				            disabled={selectedOrder.status !== "PENDING"}
-				            onClick={() =>
-				                acceptOrder(selectedOrder.id)
-				            }
-				        >
-				            ✓ Accept
-				        </button>
 
+									<div>
 
-				        {/* Reject */}
-				        <button
-				            className="btn btn-danger"
-				            disabled={selectedOrder.status !== "PENDING"}
-				            onClick={() =>
-				                rejectOrder(selectedOrder.id)
-				            }
-				        >
-				            ✕ Reject
-				        </button>
+										<span className="dashboard-modal-label">
+											Payment
+										</span>
 
+										<strong>
+											{selectedOrder.paymentMethod === "CASH"
+												? "💵 Cash"
+												: "💳 Credit Card"}
+										</strong>
 
-				        {/* Preparing */}
-				        <button
-				            className="btn btn-primary"
-				            disabled={selectedOrder.status !== "ACCEPTED"}
-				            onClick={() =>
-				                preparingOrder(selectedOrder.id)
-				            }
-				        >
-				            🍳 Preparing
-				        </button>
+									</div>
 
 
-				        {/* Ready */}
-				        <button
-				            className="btn btn-info"
-				            disabled={selectedOrder.status !== "PREPARING"}
-				            onClick={() =>
-				                readyOrder(selectedOrder.id)
-				            }
-				        >
-				            ✓ Ready
-				        </button>
+									<div>
 
+										<span className="dashboard-modal-label">
+											Address
+										</span>
 
-				        {/* Delivered */}
-				        <button
-				            className="btn btn-dark"
-				            disabled={selectedOrder.status !== "READY"}
-				            onClick={() =>
-				                deliveredOrder(selectedOrder.id)
-				            }
-				        >
-				            🚚 Delivered
-				        </button>
+										<strong>
+											{selectedOrder.addressLabel}
+										</strong>
 
-				    </div>
+									</div>
 
 
-				    <div className="dashboard-secondary-actions">
+									<div className="dashboard-modal-address-description">
 
-				        {/* Print */}
-				        <button
-				            className="btn btn-outline-dark"
-				            onClick={printOrder}
-				        >
-				            🖨️ Print Order
-				        </button>
+										<span className="dashboard-modal-label">
+											Description
+										</span>
 
+										<strong>
+											{selectedOrder.addressDescription}
+										</strong>
 
-				        {/* Close */}
-				        <button
-				            className="btn btn-secondary"
-				            onClick={() =>
-				                setShowOrderModal(false)
-				            }
-				        >
-				            Close
-				        </button>
+									</div>
 
-				    </div>
+
+								</div>
+
+								{/* Customer Location */}
+								{selectedOrder.latitude !== null &&
+									selectedOrder.longitude !== null && (
+
+
+										<div className="dashboard-modal-location">
+
+											<a
+												href={`https://www.google.com/maps?q=${selectedOrder.latitude},${selectedOrder.longitude}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="btn btn-outline-primary"
+											>
+												📍 View Customer Location
+											</a>
+
+										</div>
+
+									)}
+
+
+
+								{/* Order Items */}
+								<div className="dashboard-modal-section">
+
+									<h6 className="dashboard-modal-section-title">
+										🧾 Order Items
+									</h6>
+
+									<div className="dashboard-order-items">
+
+
+										{selectedOrder.items.map((item, index) => (
+
+											<div
+												key={index}
+												className="dashboard-modal-item"
+											>
+
+												{/* Item Image */}
+												{item.imageUrl ? (
+
+													<img
+														src={`http://localhost:8081/images/${item.imageUrl}`}
+														alt={item.itemName}
+														className="dashboard-modal-item-image"
+													/>
+
+												) : (
+
+													<div className="dashboard-modal-item-image-placeholder">
+														🍽️
+													</div>
+
+												)}
+
+
+												{/* Item Information */}
+												<div className="dashboard-modal-item-details">
+
+													<strong>
+														{item.itemName}
+													</strong>
+
+													{item.optionName && (
+														<small>
+															{item.optionName}
+														</small>
+													)}
+
+													<span>
+														Quantity: {item.quantity}
+													</span>
+
+												</div>
+
+
+												{/* Item Price */}
+												<strong className="dashboard-order-price">
+													{item.price * item.quantity} SR
+												</strong>
+
+											</div>
+
+										))}
+
+
+									</div>
+
+
+									{/* Total */}
+									<div className="dashboard-modal-total">
+
+										<span>
+											Total
+										</span>
+
+										<strong>
+											{selectedOrder.totalPrice} SR
+										</strong>
+
+									</div>
+
+								</div>
+
+
+								{/* Customer Note */}
+								{selectedOrder.customerNote && (
+
+									<div className="alert alert-warning dashboard-customer-note">
+
+										<h5>
+											📝 Customer Note
+										</h5>
+
+										<p className="mb-0">
+											{selectedOrder.customerNote}
+										</p>
+
+									</div>
+
+								)}
+
+
+								{/* Rejection Reason */}
+								{selectedOrder.rejectionReason && (
+
+									<div className="alert alert-danger dashboard-rejection-reason">
+
+										<h5>
+											❌ Rejection Reason
+										</h5>
+
+										<p className="mb-0">
+											{selectedOrder.rejectionReason}
+										</p>
+
+									</div>
+
+								)}
+
+							</div>
+
+
+
+							{/* Modal Footer */}
+							<div className="modal-footer">
+
+								<div className="dashboard-status-actions">
+
+									{/* Accept */}
+									<button
+										className="btn btn-success"
+										disabled={selectedOrder.status !== "PENDING"}
+										onClick={() =>
+											acceptOrder(selectedOrder.id)
+										}
+									>
+										✓ Accept
+									</button>
+
+
+									{/* Reject */}
+									<button
+										className="btn btn-danger"
+										disabled={selectedOrder.status !== "PENDING"}
+										onClick={() =>
+											rejectOrder(selectedOrder.id)
+										}
+									>
+										✕ Reject
+									</button>
+
+
+									{/* Preparing */}
+									<button
+										className="btn btn-primary"
+										disabled={selectedOrder.status !== "ACCEPTED"}
+										onClick={() =>
+											preparingOrder(selectedOrder.id)
+										}
+									>
+										🍳 Preparing
+									</button>
+
+
+									{/* Ready */}
+									<button
+										className="btn btn-info"
+										disabled={selectedOrder.status !== "PREPARING"}
+										onClick={() =>
+											readyOrder(selectedOrder.id)
+										}
+									>
+										✓ Ready
+									</button>
+
+
+									{/* Delivered */}
+									<button
+										className="btn btn-dark"
+										disabled={selectedOrder.status !== "READY"}
+										onClick={() =>
+											deliveredOrder(selectedOrder.id)
+										}
+									>
+										🚚 Delivered
+									</button>
+
+								</div>
+
+
+								<div className="dashboard-secondary-actions">
+
+									{/* Print */}
+									<button
+										className="btn btn-outline-dark"
+										onClick={printOrder}
+									>
+										🖨️ Print Order
+									</button>
+
+
+									{/* Close */}
+									<button
+										className="btn btn-secondary"
+										onClick={() =>
+											setShowOrderModal(false)
+										}
+									>
+										Close
+									</button>
+
+								</div>
+
+							</div>
+
+
+
+						</div>
+
+					</div>
 
 				</div>
-				
+
+			)}
 
 
-            </div>
-
-        </div>
-
-    </div>
-
-)}
 
 
-        
+		</div>
 
-    </div>
-
-);
+	);
 
 
 }

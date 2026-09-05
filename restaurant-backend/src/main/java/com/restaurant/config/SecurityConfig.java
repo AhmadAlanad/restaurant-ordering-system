@@ -111,6 +111,8 @@ public class SecurityConfig {
                 		    "/api/menu-items/*/options/*"
                 		).hasRole("ADMIN")
 
+                        .requestMatchers("/ws/**").permitAll()
+
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

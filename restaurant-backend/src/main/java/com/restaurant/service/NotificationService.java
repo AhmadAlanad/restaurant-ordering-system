@@ -90,6 +90,23 @@ public class NotificationService {
 
         notificationRepository.save(notification);
     }
+    
+    public void markAllAsRead() {
+
+        User user = getAuthenticatedUser();
+
+        List<Notification> notifications =
+                notificationRepository
+                        .findByUserIdAndIsReadFalseOrderByCreatedAtDesc(
+                                user.getId()
+                        );
+
+        for (Notification notification : notifications) {
+            notification.setRead(true);
+        }
+
+        notificationRepository.saveAll(notifications);
+    }
 
 
     private User getAuthenticatedUser() {
@@ -114,6 +131,7 @@ public class NotificationService {
                 new NotificationResponseDTO();
 
         dto.setId(notification.getId());
+        dto.setOrderId(notification.getOrderId());
         dto.setMessage(notification.getMessage());
         dto.setType(notification.getType());
         dto.setRead(notification.isRead());

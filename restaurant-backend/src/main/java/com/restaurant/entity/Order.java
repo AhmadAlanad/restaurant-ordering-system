@@ -44,6 +44,10 @@ public class Order {
     
     private LocalDateTime orderDate;
     
+    private LocalDateTime acceptedAt;
+
+    private LocalDateTime rejectedAt;
+    
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -157,6 +161,22 @@ public class Order {
 
 	public void setOrderDate(LocalDateTime orderDate) {
 	    this.orderDate = orderDate;
+	}
+	
+	public LocalDateTime getAcceptedAt() {
+	    return acceptedAt;
+	}
+
+	public void setAcceptedAt(LocalDateTime acceptedAt) {
+	    this.acceptedAt = acceptedAt;
+	}
+
+	public LocalDateTime getRejectedAt() {
+	    return rejectedAt;
+	}
+
+	public void setRejectedAt(LocalDateTime rejectedAt) {
+	    this.rejectedAt = rejectedAt;
 	}
 	
 	public User getUser() {
