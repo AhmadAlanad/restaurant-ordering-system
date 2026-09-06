@@ -14,12 +14,11 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
-    
+
     public Category updateCategory(UUID id, Category updatedCategory) {
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         category.setName(updatedCategory.getName());
 
@@ -28,10 +27,20 @@ public class CategoryService {
     }
 
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAllByOrderByDisplayOrderAsc();
     }
 
     public Category saveCategory(Category category) {
+
+        if (category.getDisplayOrder() == null) {
+
+            List<Category> categories = categoryRepository.findAll();
+
+            int nextOrder = categories.size() + 1;
+
+            category.setDisplayOrder(nextOrder);
+        }
+
         return categoryRepository.save(category);
     }
 

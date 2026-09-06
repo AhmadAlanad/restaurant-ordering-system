@@ -9,10 +9,10 @@ import java.util.UUID;
 @Entity
 public class Category {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    private Integer displayOrder;
     private String name;
 
     public Category() {
@@ -29,6 +29,14 @@ public class Category {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public Integer getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     public String getName() {

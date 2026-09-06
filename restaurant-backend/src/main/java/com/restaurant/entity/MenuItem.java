@@ -26,6 +26,7 @@ public class MenuItem {
     private String imageUrl;
 
     private boolean available;
+    private Integer displayOrder;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -103,6 +104,14 @@ public class MenuItem {
     public void setAvailable(boolean available) {
         this.available = available;
     }
+
+    public Integer getDisplayOrder() {
+    return displayOrder;
+}
+
+public void setDisplayOrder(Integer displayOrder) {
+    this.displayOrder = displayOrder;
+}
 
     public Category getCategory() {
         return category;
