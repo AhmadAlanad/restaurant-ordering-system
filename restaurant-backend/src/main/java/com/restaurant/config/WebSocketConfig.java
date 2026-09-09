@@ -1,6 +1,7 @@
 package com.restaurant.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -9,32 +10,27 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig
-        implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private WebSocketAuthInterceptor webSocketAuthInterceptor;
 
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
 
     @Override
-    public void configureMessageBroker(
-            MessageBrokerRegistry config) {
+    public void configureMessageBroker(MessageBrokerRegistry config) {
 
         config.enableSimpleBroker("/topic");
-
         config.setApplicationDestinationPrefixes("/app");
     }
-
 
     @Override
     public void configureClientInboundChannel(
             org.springframework.messaging.simp.config.ChannelRegistration registration) {
 
-        registration.interceptors(
-                webSocketAuthInterceptor
-        );
+        registration.interceptors(webSocketAuthInterceptor);
     }
-
 
     @Override
     public void registerStompEndpoints(
@@ -42,7 +38,7 @@ public class WebSocketConfig
 
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns(
-                        "http://localhost:5173"
+                        allowedOrigins.split(",")
                 );
     }
 }
