@@ -2,23 +2,26 @@ package com.restaurant.dto;
 
 import java.util.UUID;
 
-public class BestSellingItemDTO {
+public class CategoryMenuItemSalesDTO {
 
     private UUID menuItemId;
     private String menuItemName;
     private long quantitySold;
+    private double totalSales;
 
-    public BestSellingItemDTO() {
+    public CategoryMenuItemSalesDTO() {
     }
 
-    public BestSellingItemDTO(
+    public CategoryMenuItemSalesDTO(
             UUID menuItemId,
             String menuItemName,
-            long quantitySold) {
+            long quantitySold,
+            double totalSales) {
 
         this.menuItemId = menuItemId;
         this.menuItemName = menuItemName;
         this.quantitySold = quantitySold;
+        this.totalSales = totalSales;
     }
 
     public UUID getMenuItemId() {
@@ -43,5 +46,13 @@ public class BestSellingItemDTO {
 
     public void setQuantitySold(long quantitySold) {
         this.quantitySold = quantitySold;
+    }
+
+    public double getTotalSales() {
+        return totalSales;
+    }
+
+    public void setTotalSales(double totalSales) {
+        this.totalSales = totalSales;
     }
 }

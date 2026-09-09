@@ -1,5 +1,8 @@
 package com.restaurant.dto;
 
+import java.util.List;
+
+
 public class SalesReportDTO {
 
     private double totalRevenue;
@@ -11,6 +14,7 @@ public class SalesReportDTO {
     private long acceptedOrders;
     private long pendingOrders;
     private long rejectedOrders;
+    private List<BestSellingItemDTO> bestSellingItems;
 
     public SalesReportDTO() {
     }
@@ -77,6 +81,16 @@ public class SalesReportDTO {
 
     public void setRejectedOrders(long rejectedOrders) {
         this.rejectedOrders = rejectedOrders;
+    }
+
+    public List<BestSellingItemDTO> getBestSellingItems() {
+        return bestSellingItems;
+    }
+
+    public void setBestSellingItems(
+            List<BestSellingItemDTO> bestSellingItems) {
+
+        this.bestSellingItems = bestSellingItems;
     }
 
 }
